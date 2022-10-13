@@ -35,7 +35,7 @@ public class Validity {
             chr_stack.pop();
         }
 
-        if (balance == 0 & !cbrackets.contains(bracket))
+        if (balance == 0 && !cbrackets.contains(bracket))
             /*
              * if the expression is valid the balance should be 0.
              * and the first bracket in the expression shouldn't be a closing one.
@@ -62,10 +62,10 @@ public class Validity {
                 chr_stack.push(str);
 
             // if the first encountered bracket is a closing one.
-            if (cond2 & chr_stack.empty())
+            if (cond2 && chr_stack.empty())
                 return false;
 
-            if (cond2 & !chr_stack.empty())
+            if (cond2 && !chr_stack.empty())
                 // make sure brackets are of the same type.
                 if (obrackets.indexOf(chr_stack.peek()) == cbrackets.indexOf(str))
                     chr_stack.pop();
@@ -74,6 +74,6 @@ public class Validity {
                     return false;
         }
 
-        return true;
+        return chr_stack.empty();
     }
 }
