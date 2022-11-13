@@ -2,20 +2,6 @@ from pprint import pprint
 from typing import Any
 
 
-class State():
-    def __init__(self, label: set, next: dict = {}, start: bool = False, accept: bool = False) -> None:
-        self.label = label
-        self.next = next
-        self.start = start
-        self.accept = accept
-
-    def setNext(self, label: str, move: str) -> None:
-        self.next[move] = State(label)
-
-    def move(move: str) -> object:
-        return next[move]
-
-
 class DFA():
     def __init__(self, states: set, alphabet: set, delta: dict, start: str, accept: set) -> None:
         self.states = states
