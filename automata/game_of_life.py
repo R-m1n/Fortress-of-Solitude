@@ -4,19 +4,20 @@ import numpy as np
 
 
 class Life():
-    first_gen = np.zeros((25, 25), np.int0)
+    def __init__(self, length) -> None:
+        self.first_gen = np.zeros((length, length), np.int0)
+        self.length = length
 
     def evolve(self, first_gen: List[List[int]]) -> List[List[int]]:
-        length = len(first_gen)
-        next_gen = np.zeros((length, length), np.int0)
+        next_gen = np.zeros((self.length, self.length), np.int0)
         alive, dead = 1, 0
 
-        for row in range(length):
-            for column in range(length):
+        for row in range(self.length):
+            for column in range(self.length):
                 cell, coordinates = first_gen[row][column], (row, column)
                 alive_neighbors = 0
 
-                for neighbor in self.neighbors(coordinates, length):
+                for neighbor in self.neighbors(coordinates, self.length):
                     if first_gen[neighbor[0]][neighbor[1]] == alive:
                         alive_neighbors += 1
 
@@ -90,7 +91,7 @@ class Life():
             sleep(0.25)
 
     @staticmethod
-    def neighbors(coordinates: tuple, row_length: int) -> List[Tuple[int]]:
+    def neighbors(coordinates: tuple, length: int) -> List[Tuple[int]]:
         row, column = coordinates
 
         n = (row - 1, column)
@@ -106,7 +107,7 @@ class Life():
         neighbors = []
 
         for neighbor in potential_neighbors:
-            if (neighbor[0] < 0 or neighbor[0] >= row_length) or (neighbor[1] < 0 or neighbor[1] >= row_length):
+            if (neighbor[0] < 0 or neighbor[0] >= length) or (neighbor[1] < 0 or neighbor[1] >= length):
                 continue
 
             neighbors.append(neighbor)
