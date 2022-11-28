@@ -1,3 +1,4 @@
+import math
 from time import sleep
 from typing import List, Tuple
 import numpy as np
@@ -7,6 +8,7 @@ class Life():
     def __init__(self, length) -> None:
         self.first_gen = np.zeros((length, length), np.int0)
         self.length = length
+        self.pivot = int(math.sqrt(length))
 
     def evolve(self, first_gen: List[List[int]]) -> List[List[int]]:
         next_gen = np.zeros((self.length, self.length), np.int0)
@@ -40,37 +42,72 @@ class Life():
 
         return next_gen
 
+    def sandbox(self, points: List[Tuple[int]]):
+        for point in points:
+            row = point[0] + self.pivot
+            column = point[1] + self.pivot
+
+            self.first_gen[row][column] = 1
+
+        self.__play()
+
+    def block(self):
+        points = [(1, 1), (1, 2), (2, 1), (2, 2)]
+
+        self.sandbox(points)
+
+    def bee_hive(self):
+        points = [(1, 2), (1, 3), (2, 1), (2, 4), (3, 2), (3, 3)]
+
+        self.sandbox(points)
+
+    def loaf(self):
+        points = [(1, 2), (1, 3), (2, 1), (2, 4), (3, 3), (3, 5), (4, 3)]
+
+        self.sandbox(points)
+
+    def boat(self):
+        points = [(1, 1), (1, 2), (2, 1), (2, 3), (3, 2)]
+
+        self.sandbox(points)
+
+    def tub(self):
+        points = [(1, 2), (2, 1), (2, 3), (3, 2)]
+
+        self.sandbox(points)
+
+    def blinker(self):
+        points = [(1, 2), (2, 2), (3, 2)]
+
+        self.sandbox(points)
+
     def glider(self):
-        self.first_gen[2 + 8][0 + 10] = 1
-        self.first_gen[2 + 8][1 + 10] = 1
-        self.first_gen[2 + 8][2 + 10] = 1
-        self.first_gen[1 + 8][2 + 10] = 1
-        self.first_gen[0 + 8][1 + 10] = 1
+        points = [(2, 0), (2, 1), (2, 2), (1, 2), (0, 1)]
 
-        self.__play()
+        self.sandbox(points)
 
-    def skull(self):
-        self.first_gen[2 + 8][1 + 10] = 1
-        self.first_gen[2 + 8][2 + 10] = 1
-        self.first_gen[2 + 8][3 + 10] = 1
-        self.first_gen[1 + 8][3 + 10] = 1
-        self.first_gen[1 + 8][0 + 10] = 1
+    def flint(self):
+        points = [(2, 1), (2, 2), (2, 3), (1, 3), (1, 0)]
 
-        self.__play()
+        self.sandbox(points)
 
     def ti(self):
-        self.first_gen[0 + 8][0 + 10] = 1
-        self.first_gen[0 + 8][1 + 10] = 1
-        self.first_gen[0 + 8][2 + 10] = 1
-        self.first_gen[0 + 8][3 + 10] = 1
-        self.first_gen[0 + 8][4 + 10] = 1
-        self.first_gen[1 + 8][2 + 10] = 1
-        self.first_gen[2 + 8][2 + 10] = 1
-        self.first_gen[3 + 8][2 + 10] = 1
-        self.first_gen[4 + 8][2 + 10] = 1
-        self.first_gen[5 + 8][2 + 10] = 1
+        points = [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4),
+                  (1, 2), (2, 2), (3, 2), (4, 2), (5, 2)]
 
-        self.__play()
+        self.sandbox(points)
+
+    def polsar(self):
+        points = [(0, 2), (0, 3), (0, 4), (0, 8), (0, 9), (0, 10),
+                  (2, 0), (2, 5), (2, 7), (2, 12), (3, 0), (3, 5),
+                  (3, 7), (3, 12), (4, 0), (4, 5), (4, 7), (4, 12),
+                  (5, 2), (5, 3), (5, 4), (5, 8), (5, 9), (5, 10),
+                  (7, 2), (7, 3), (7, 4), (7, 8), (7, 9), (7, 10),
+                  (8, 0), (8, 5), (8, 7), (8, 12), (9, 0), (9, 5),
+                  (9, 7), (9, 12), (10, 0), (10, 5), (10, 7), (10, 12),
+                  (12, 2), (12, 3), (12, 4), (12, 8), (12, 9), (12, 10), ]
+
+        self.sandbox(points)
 
     def __play(self):
         gen = 1
@@ -115,6 +152,6 @@ class Life():
         return neighbors
 
 
-life = Life()
+life = Life(35)
 
-life.ti()
+life.boat()
