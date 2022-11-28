@@ -21,7 +21,7 @@ class DFA():
         return state in self.accept
 
     def intersection(self, other):
-        states = self.__prod(self.states, other.states)
+        states = self.prod(self.states, other.states)
 
         alphabet = self.alphabet
 
@@ -33,12 +33,12 @@ class DFA():
 
         start = (self.start, other.start)
 
-        accept = self.__prod(self.accept, other.accept)
+        accept = self.prod(self.accept, other.accept)
 
         return DFA(states, alphabet, delta, start, accept)
 
     def union(self, other):
-        states = self.__prod(self.states, other.states)
+        states = self.prod(self.states, other.states)
 
         alphabet = self.alphabet
 
@@ -50,8 +50,8 @@ class DFA():
 
         start = (self.start, other.start)
 
-        accept = self.__prod(self.accept, other.states).union(
-            self.__prod(self.states, other.accept))
+        accept = self.prod(self.accept, other.states).union(
+            self.prod(self.states, other.accept))
 
         return DFA(states, alphabet, delta, start, accept)
 
@@ -60,7 +60,8 @@ class DFA():
 
         return DFA(self.states, self.alphabet, self.delta, self.start, accept)
 
-    def __prod(self, set1: set, set2: set) -> set:
+    @staticmethod
+    def prod(set1: set, set2: set) -> set:
         result = set()
 
         for i in set1:
@@ -70,12 +71,17 @@ class DFA():
         return result
 
 
-d1 = {('q1', 'a'): 'q2', ('q1', 'b'): 'q1',
-      ('q2', 'a'): 'q2', ('q2', 'b'): 'q3',
-      ('q3', 'a'): 'q3', ('q3', 'b'): 'q3'}
+d1 = {('q1', 'a'): 'q1', ('q1', 'b'): 'q1', ('q1', '#'): 'q1', ('q1', '/'): 'q2',
+      ('q2', 'a'): 'q6', ('q2', 'b'): 'q6', ('q2', '#'): 'q3', ('q2', '/'): 'q6',
+      ('q3', 'a'): 'q3', ('q3', 'b'): 'q3', ('q3', '#'): 'q4', ('q3', '/'): 'q3',
+      ('q4', 'a'): 'q6', ('q4', 'b'): 'q6', ('q4', '#'): 'q4', ('q4', '/'): 'q5',
+      ('q5', 'a'): 'q6', ('q5', 'b'): 'q6', ('q5', '#'): 'q3', ('q5', '/'): 'q2',
+      ('q6', 'a'): 'q6', ('q6', 'b'): 'q6', ('q6', '#'): 'q6', ('q6', '/'): 'q6'}
 
-m1 = DFA({'q1', 'q2', 'q3'}, {'a', 'b'}, d1, 'q1', {'q3'})
+m1 = DFA({'q1', 'q2', 'q3', 'q4', 'q5', 'q6'}, {
+         'a', 'b', '/', '#'}, d1, 'q1', {'q5'})
 
-m = m1.complement()
 
-pprint(m.test("bbbbbbbbbaaab"))
+input = "/#abaababbabababababab"
+print(f"{input} => ", end="")
+pprint(m1.test(input))
