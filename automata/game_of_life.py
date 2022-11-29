@@ -8,7 +8,7 @@ class Life():
     def __init__(self, length) -> None:
         self.first_gen = np.zeros((length, length), np.int0)
         self.length = length
-        self.pivot = int(math.sqrt(length))
+        self.pivot = (int(math.sqrt(length)) + 2) * 2
 
     def evolve(self, first_gen: List[List[int]]) -> List[List[int]]:
         next_gen = np.zeros((self.length, self.length), np.int0)
@@ -81,19 +81,14 @@ class Life():
 
         self.sandbox(points)
 
-    def glider(self):
-        points = [(2, 0), (2, 1), (2, 2), (1, 2), (0, 1)]
+    def toad(self):
+        points = [(2, 1), (2, 2), (2, 3), (1, 2), (1, 3), (1, 4)]
 
         self.sandbox(points)
 
-    def flint(self):
-        points = [(2, 1), (2, 2), (2, 3), (1, 3), (1, 0)]
-
-        self.sandbox(points)
-
-    def ti(self):
-        points = [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4),
-                  (1, 2), (2, 2), (3, 2), (4, 2), (5, 2)]
+    def beacon(self):
+        points = [(1, 1), (1, 2), (2, 1),
+                  (3, 4), (4, 3), (4, 4)]
 
         self.sandbox(points)
 
@@ -106,6 +101,46 @@ class Life():
                   (8, 0), (8, 5), (8, 7), (8, 12), (9, 0), (9, 5),
                   (9, 7), (9, 12), (10, 0), (10, 5), (10, 7), (10, 12),
                   (12, 2), (12, 3), (12, 4), (12, 8), (12, 9), (12, 10), ]
+
+        self.sandbox(points)
+
+    def pentadecathlon(self):
+        points = [(0, 1), (0, 2), (0, 3),
+                  (1, 0), (1, 4),
+                  (2, 0), (2, 4),
+                  (3, 1), (3, 2), (3, 3),
+                  (8, 1), (8, 2), (8, 3),
+                  (9, 0), (9, 4),
+                  (10, 0), (10, 4),
+                  (11, 1), (11, 2), (11, 3), ]
+
+        self.sandbox(points)
+
+    def glider(self):
+        points = [(2, 0), (2, 1), (2, 2), (1, 2), (0, 1)]
+
+        self.sandbox(points)
+
+    def lwss(self):
+        points = [(0, 4), (1, 5), (2, 0), (2, 5), (3, 1),
+                  (3, 2), (3, 3), (3, 4), (3, 5)]
+
+        self.sandbox(points)
+
+    def mwss(self):
+        points = [(0, 5), (1, 6), (2, 0), (2, 6), (3, 1),
+                  (3, 2), (3, 3), (3, 4), (3, 5), (3, 6)]
+
+        self.sandbox(points)
+
+    def flint(self):
+        points = [(2, 1), (2, 2), (2, 3), (1, 3), (1, 0)]
+
+        self.sandbox(points)
+
+    def ti(self):
+        points = [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4),
+                  (1, 2), (2, 2), (3, 2), (4, 2), (5, 2)]
 
         self.sandbox(points)
 
@@ -152,6 +187,6 @@ class Life():
         return neighbors
 
 
-life = Life(35)
+life = Life(50)
 
-life.boat()
+life.mwss()
