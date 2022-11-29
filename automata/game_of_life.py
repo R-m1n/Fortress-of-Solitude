@@ -5,10 +5,10 @@ import numpy as np
 
 
 class Life():
-    def __init__(self, length) -> None:
+    def __init__(self, length: int = 50) -> None:
         self.first_gen = np.zeros((length, length), np.int0)
         self.length = length
-        self.pivot = (int(math.sqrt(length)) + 2) * 2
+        self.pivot = int(math.sqrt(length) + 2) * 2
 
     def evolve(self, first_gen: List[List[int]]) -> List[List[int]]:
         next_gen = np.zeros((self.length, self.length), np.int0)
@@ -122,14 +122,35 @@ class Life():
         self.sandbox(points)
 
     def lwss(self):
+        points = [(0, 3), (1, 4), (2, 0), (2, 4), (3, 1),
+                  (3, 2), (3, 3), (3, 4)]
+
+        self.sandbox(points)
+
+    def mwss(self):
         points = [(0, 4), (1, 5), (2, 0), (2, 5), (3, 1),
                   (3, 2), (3, 3), (3, 4), (3, 5)]
 
         self.sandbox(points)
 
-    def mwss(self):
+    def hwss(self):
         points = [(0, 5), (1, 6), (2, 0), (2, 6), (3, 1),
                   (3, 2), (3, 3), (3, 4), (3, 5), (3, 6)]
+
+        self.sandbox(points)
+
+    def r_pentomino(self):
+        points = [(0, 1), (0, 2), (1, 0), (1, 1), (2, 1)]
+
+        self.sandbox(points)
+
+    def die_hard(self):
+        points = [(1, 0), (1, 1), (2, 1), (0, 6), (2, 5), (2, 6), (2, 7)]
+
+        self.sandbox(points)
+
+    def acorn(self):
+        points = [(0, 1), (1, 3), (2, 0), (2, 1), (2, 4), (2, 5), (2, 6)]
 
         self.sandbox(points)
 
@@ -160,7 +181,7 @@ class Life():
             print(string)
             first_gen = next_gen
             gen += 1
-            sleep(0.25)
+            sleep(0.2)
 
     @staticmethod
     def neighbors(coordinates: tuple, length: int) -> List[Tuple[int]]:
@@ -187,6 +208,6 @@ class Life():
         return neighbors
 
 
-life = Life(50)
+life = Life(60)
 
-life.mwss()
+life.r_pentomino()
