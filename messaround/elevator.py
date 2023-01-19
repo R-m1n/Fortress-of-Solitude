@@ -26,20 +26,27 @@ class Elevator():
 
         self.status = self.get_status(destination)
 
+        print(f"cabin: {cabin} -> floor: {self.current_floor}")
+
         while len(cabin) != 0:
             self.current_floor += self.status
 
             if self.current_floor in self.passengers \
-                    and self.get_status(self.passengers[self.current_floor]) == self.status:
+                    and (self.get_status(self.passengers[self.current_floor]) == self.status
+                         or self.get_status(self.passengers[self.current_floor]) == self.IDLE):
 
                 cabin.append(self.current_floor)
+
+            print(f"cabin: {cabin} -> floor: {self.current_floor}")
 
             for passenger in cabin:
                 destination = self.passengers[passenger]
 
-                if self.current_floor == destination:
+                if self.current_floor == destination or destination == 0:
                     cabin.remove(passenger)
                     self.passengers.pop(passenger)
+
+        print(f"cabin: {cabin} -> floor: {self.current_floor}")
 
         self.elevate()
 
@@ -63,7 +70,7 @@ class Elevator():
 
     def get_status(self, destination):
 
-        if self.current_floor == destination:
+        if self.current_floor == destination or destination == 0:
             return self.IDLE
 
         if self.current_floor > destination:
@@ -73,7 +80,7 @@ class Elevator():
             return self.UP
 
 
-passengers = [(1, 5), (2, 4), (3, 1)]
+passengers = [(1, 5), (2, 0), (3, 1)]
 passengers = dict(passengers)
 e = Elevator(passengers)
 e.elevate()
