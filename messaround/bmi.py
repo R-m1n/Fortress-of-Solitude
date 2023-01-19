@@ -43,14 +43,33 @@ def convert_height(unit):
     return lambda height: height
 
 
+def evaluate(bmi):
+    bmi = float(bmi)
+
+    if bmi >= 30:
+        return "Obese"
+
+    elif 30 > bmi >= 25:
+        return "Overweight"
+
+    elif 25 > bmi >= 18.5:
+        return "Normal"
+
+    return "Underweight"
+
+
 def create_toplevel():
     window = customtkinter.CTkToplevel()
     window.title('')
 
     bmi = "{:.1f}".format(calculate_bmi())
-    label = customtkinter.CTkLabel(
+    label_1 = customtkinter.CTkLabel(
         window, text=f"BMI:\t{bmi}", font=customtkinter.CTkFont(size=18))
-    label.pack(side="top", fill="both", expand=True, padx=40, pady=40)
+    label_1.pack(side="top", fill="both", expand=True, padx=40, pady=10)
+
+    label_2 = customtkinter.CTkLabel(
+        window, text=f"{evaluate(bmi)}", font=customtkinter.CTkFont(size=18))
+    label_2.pack(side="top", fill="both", expand=True, padx=40, pady=10)
 
 
 def clear_entries():
