@@ -5,15 +5,17 @@ class Elevator():
     IDLE = 0
     DOWN = -1
 
-    def __init__(self, passengers: dict, start_floor: int = 1) -> None:
-        self.passengers = passengers
-        self.passenger_count = len(passengers)
+    def __init__(self, route: dict, start_floor: int = 1) -> None:
+        self.route = route
+        self.floor_count = max(route.values())
         self.current_floor = start_floor
         self.status = self.IDLE
+        self.log = f"\nPassengers waiting on floors: {list(route.keys())}\n\nCurrent floor: {self.current_floor}\n"
+        self.movement = 0
 
     def elevate(self) -> None:
 
-        if len(self.passengers) == 0:
+        if len(self.route) == 0:
             return
 
         cabin = []
@@ -22,55 +24,60 @@ class Elevator():
 
         cabin.append(self.current_floor)
 
-        destination = self.passengers[self.current_floor]
+        destination = self.route[self.current_floor]
 
         self.status = self.get_status(destination)
 
-        print(f"cabin: {cabin} -> floor: {self.current_floor}")
+        self.log += f"cabin: {cabin}\t\t\t\tfloor: {self.current_floor}\n"
 
         while len(cabin) != 0:
             self.current_floor += self.status
 
-            if self.current_floor in self.passengers \
-                    and (self.get_status(self.passengers[self.current_floor]) == self.status
-                         or self.get_status(self.passengers[self.current_floor]) == self.IDLE):
+            self.movement += 1
+
+            if self.current_floor in self.route \
+                    and (self.get_status(self.route[self.current_floor]) == self.status
+                         or self.get_status(self.route[self.current_floor]) == self.IDLE):
 
                 cabin.append(self.current_floor)
 
-            print(f"cabin: {cabin} -> floor: {self.current_floor}")
+            self.log += f"cabin: {cabin}\t\t\t\tfloor: {self.current_floor}\n"
 
             for passenger in cabin:
-                destination = self.passengers[passenger]
+                destination = self.route[passenger]
 
-                if self.current_floor == destination or destination == 0:
+                if self.current_floor == destination or destination == self.IDLE:
                     cabin.remove(passenger)
-                    self.passengers.pop(passenger)
+                    self.route.pop(passenger)
 
-        print(f"cabin: {cabin} -> floor: {self.current_floor}")
+        self.log += f"cabin: {cabin}\t\t\t\tfloor: {self.current_floor}\n"
 
         self.elevate()
 
     def goto_closest(self) -> int:
+        self.log += "\nFinding closest passenger...\n\n"
 
-        if self.current_floor in self.passengers:
+        if self.current_floor in self.route:
             return self.current_floor
 
         up_probe = self.current_floor
         down_probe = self.current_floor
 
-        for i in range(self.passenger_count):
+        for floor_number in range(self.floor_count):
             up_probe += self.UP
             down_probe += self.DOWN
 
-            if up_probe in self.passengers:
+            self.movement += 1
+
+            if up_probe in self.route:
                 return up_probe
 
-            if down_probe in self.passengers:
+            if down_probe in self.route:
                 return down_probe
 
     def get_status(self, destination):
 
-        if self.current_floor == destination or destination == 0:
+        if self.current_floor == destination or destination == self.IDLE:
             return self.IDLE
 
         if self.current_floor > destination:
@@ -80,7 +87,9 @@ class Elevator():
             return self.UP
 
 
-passengers = [(1, 5), (2, 0), (3, 1)]
-passengers = dict(passengers)
-e = Elevator(passengers)
-e.elevate()
+route = [(1, 5), (2, 0), (3, 1)]
+route = dict(route)
+elevator = Elevator(route)
+elevator.elevate()
+print(elevator.log)
+print(f"Total movements: {elevator.movement}")
