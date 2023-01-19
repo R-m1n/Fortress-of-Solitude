@@ -9,21 +9,21 @@ app.title("BMI Calculator")
 
 
 def button_callback():
+    create_toplevel()
+    clear_entries()
+
+
+def calculate_bmi():
     weight = 0 if entry_1.get() == '' \
-        else standardize_weight(combobox_1.get())(float(entry_1.get()))
+        else convert_weight(combobox_1.get())(float(entry_1.get()))
 
     height = 1 if entry_2.get() == '' \
-        else standardize_height(combobox_2.get())(float(entry_2.get()))
+        else convert_height(combobox_2.get())(float(entry_2.get()))
 
-    bmi = weight / pow(height, 2)
-
-    create_toplevel("{:.1f}".format(bmi))
-
-    entry_1.delete(0, len(entry_1.get()))
-    entry_2.delete(0, len(entry_2.get()))
+    return weight / pow(height, 2)
 
 
-def standardize_weight(unit):
+def convert_weight(unit):
     if unit == "g":
         return lambda weight: weight / 1000
 
@@ -33,7 +33,7 @@ def standardize_weight(unit):
     return lambda weight: weight
 
 
-def standardize_height(unit):
+def convert_height(unit):
     if unit == "cm":
         return lambda height: height / 100
 
@@ -43,13 +43,19 @@ def standardize_height(unit):
     return lambda height: height
 
 
-def create_toplevel(bmi):
+def create_toplevel():
     window = customtkinter.CTkToplevel()
     window.title('')
 
+    bmi = "{:.1f}".format(calculate_bmi())
     label = customtkinter.CTkLabel(
         window, text=f"BMI:\t{bmi}", font=customtkinter.CTkFont(size=18))
     label.pack(side="top", fill="both", expand=True, padx=40, pady=40)
+
+
+def clear_entries():
+    entry_1.delete(0, len(entry_1.get()))
+    entry_2.delete(0, len(entry_2.get()))
 
 
 if __name__ == "__main__":
