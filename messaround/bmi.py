@@ -1,12 +1,5 @@
 import customtkinter
 
-customtkinter.set_appearance_mode("dark")
-customtkinter.set_default_color_theme("dark-blue")
-
-app = customtkinter.CTk()
-app.geometry("360x200")
-app.title("BMI Calculator")
-
 
 def button_callback():
     create_toplevel()
@@ -78,6 +71,13 @@ def clear_entries():
 
 
 if __name__ == "__main__":
+    customtkinter.set_appearance_mode("dark")
+    customtkinter.set_default_color_theme("dark-blue")
+
+    app = customtkinter.CTk()
+    app.geometry("360x200")
+    app.title("BMI Calculator")
+
     frame_1 = customtkinter.CTkFrame(master=app)
     frame_1.grid(row=0, column=0, pady=20, padx=60)
 
