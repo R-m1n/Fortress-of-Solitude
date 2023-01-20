@@ -1,4 +1,3 @@
-import random
 import customtkinter
 
 
@@ -22,7 +21,7 @@ class Elevator():
 
     def elevate(self) -> None:
 
-        self._log(f"""Passengers waiting on floors: {list(self.route.keys())}
+        self._log(f"""Passenger list:\n{list(self.route.keys())}
                     \nCurrent floor: {self.current_floor}\n\n""")
 
         while len(self.route) != 0:
@@ -121,12 +120,8 @@ class Elevator():
 
                 if self.current_floor == destination or destination == self.IDLE:
 
-                    self._log(
-                        f"Removing passenger {passenger} at {self._ordinal(self.current_floor)} floor\n\n"
-                    )
-
+                    self._stall(passenger)
                     cabin.remove(passenger)
-                    self.route.pop(passenger)
 
     def _get_direction(self, destination: int) -> int:
 
@@ -140,6 +135,7 @@ class Elevator():
             return self.UP
 
     def _stall(self, passenger: int):
+
         self._log(
             f"Removing passenger {passenger} at {self._ordinal(self.current_floor)} floor\n\n"
         )
@@ -169,8 +165,12 @@ class Elevator():
 
 
 def add_passenger():
-    passenger = int(entry_1.get())
-    destination = int(entry_2.get())
+    passenger = int(entry_1.get()) if entry_1.get() != '' else 1
+    destination = int(entry_2.get()) if entry_2.get() != '' else 0
+
+    if passenger in route:
+        clear_entries()
+        return
 
     if passenger != destination:
         route[passenger] = destination
@@ -208,7 +208,7 @@ def clear_entries():
     entry_2.delete(0, len(entry_2.get()))
 
 
-if __name__ == "__main__":
+if __name__ == "__man__":
     route = {}
 
     customtkinter.set_appearance_mode("dark")
