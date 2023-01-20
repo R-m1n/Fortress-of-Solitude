@@ -14,7 +14,7 @@ class Elevator():
 
         self.current_floor = self._set_start_floor(start_floor)
 
-        self.status = self._get_status(self.IDLE)
+        self._set_status(self.IDLE)
 
         self.log = f"""\nPassengers waiting on floors: {list(route.keys())}
                     \nCurrent floor: {self.current_floor}\n\n"""
@@ -34,54 +34,23 @@ class Elevator():
 
             cabin.append(self.current_floor)
 
-            destination = self.route[self.current_floor]
+            destination = self.route.get(self.current_floor)
 
             direction = self._get_direction(destination)
 
-            self.status = self._get_status(direction)
+            self._set_status(direction)
 
             self._log(
                 f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
             )
 
-            while len(cabin) != 0:
-                self.current_floor += direction
+            self._deliver(cabin, direction)
 
-                self.time += 1
-
-                if self.current_floor in self.route \
-                        and (self._get_direction(self.route[self.current_floor]) == direction
-                             or self._get_direction(self.route[self.current_floor]) == self.IDLE):
-
-                    self._log(
-                        f"Picking up passenger {self.current_floor} at {self._ordinal(self.current_floor)} floor\n\n"
-                    )
-
-                    cabin.append(self.current_floor)
-
-                self._log(
-                    f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
-                )
-
-                for passenger in cabin:
-                    destination = self.route[passenger]
-
-                    if self.current_floor == destination or destination == self.IDLE:
-
-                        self._log(
-                            f"Removing passenger {passenger} at {self._ordinal(self.current_floor)} floor\n\n"
-                        )
-
-                        cabin.remove(passenger)
-                        self.route.pop(passenger)
-
-            self.status = self._get_status(self.IDLE)
+            self._set_status(self.IDLE)
 
             self._log(
                 f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
             )
-
-        self.status = self._get_status(self.IDLE)
 
         self._log(
             f"\nTotal time: {elevator.time}s"
@@ -96,8 +65,7 @@ class Elevator():
         if self.current_floor in self.route:
             return self.current_floor
 
-        up_probe = self.current_floor
-        down_probe = self.current_floor
+        up_probe = down_probe = self.current_floor
 
         for floor_number in range(self.floor_count):
             up_probe += self.UP
@@ -110,6 +78,45 @@ class Elevator():
 
             if down_probe in self.route:
                 return down_probe
+
+    def _deliver(self, cabin: list, direction: int) -> None:
+        while len(cabin) != 0:
+            self.current_floor += direction
+
+            self.time += 1
+
+            is_passenger_waiting = self.current_floor in self.route
+
+            if is_passenger_waiting:
+
+                is_same_direction = self._get_direction(
+                    self.route.get(self.current_floor)) == direction
+
+                is_idle = self._get_direction(
+                    self.route.get(self.current_floor)) == self.IDLE
+
+                if is_same_direction or is_idle:
+                    self._log(
+                        f"Picking up passenger {self.current_floor} at {self._ordinal(self.current_floor)} floor\n\n"
+                    )
+
+                    cabin.append(self.current_floor)
+
+            self._log(
+                f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
+            )
+
+            for passenger in cabin:
+                destination = self.route.get(passenger)
+
+                if self.current_floor == destination or destination == self.IDLE:
+
+                    self._log(
+                        f"Removing passenger {passenger} at {self._ordinal(self.current_floor)} floor\n\n"
+                    )
+
+                    cabin.remove(passenger)
+                    self.route.pop(passenger)
 
     def _get_direction(self, destination: int) -> int:
 
@@ -131,8 +138,9 @@ class Elevator():
     def _log(self, log: str) -> None:
         self.log += log
 
-    def _get_status(self, status: int):
-        return {1: "UP", 0: "IDLE", -1: "DOWN"}.get(status, "UNDER MAINTENANCE!")
+    def _set_status(self, status: int):
+        self.status = {1: "UP", 0: "IDLE", -
+                       1: "DOWN"}.get(status, "UNDER MAINTENANCE!")
 
     def _set_start_floor(self, start_floor: int) -> int:
         if start_floor < 1:
@@ -161,7 +169,7 @@ class Elevator():
         )
 
 
-route = {1: 5, 2: 4, 3: 1}
-elevator = Elevator(route, 5, 1.1)
+route = {4: 5, 2: 4, 3: 1}
+elevator = Elevator(route, 5)
 elevator.elevate()
 print(elevator.log)
