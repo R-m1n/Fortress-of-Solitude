@@ -5,12 +5,14 @@ class Elevator():
     IDLE = 0
     DOWN = -1
 
-    def __init__(self, route: dict, floor_count: int, start_floor: int = 1) -> None:
-        self.route = route
+    DEFAULT_FLOOR = 1
+
+    def __init__(self, route: dict | list[tuple], floor_count: int, start_floor: int = DEFAULT_FLOOR) -> None:
+        self.route = route if isinstance(route, dict) else dict(route)
 
         self.floor_count = self._set_floor_count(route, floor_count)
 
-        self.current_floor = start_floor
+        self.current_floor = self._set_start_floor(start_floor)
 
         self.status = self._get_status(self.IDLE)
 
@@ -26,7 +28,9 @@ class Elevator():
 
             self.current_floor = self._goto_closest()
 
-            self.log += f"Picking up passenger {self.current_floor} at {self._ordinal(self.current_floor)} floor\n\n"
+            self._log(
+                f"Picking up passenger {self.current_floor} at {self._ordinal(self.current_floor)} floor\n\n"
+            )
 
             cabin.append(self.current_floor)
 
@@ -36,7 +40,9 @@ class Elevator():
 
             self.status = self._get_status(direction)
 
-            self.log += f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
+            self._log(
+                f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
+            )
 
             while len(cabin) != 0:
                 self.current_floor += direction
@@ -47,28 +53,45 @@ class Elevator():
                         and (self._get_direction(self.route[self.current_floor]) == direction
                              or self._get_direction(self.route[self.current_floor]) == self.IDLE):
 
-                    self.log += f"Picking up passenger {self.current_floor} at {self._ordinal(self.current_floor)} floor\n\n"
+                    self._log(
+                        f"Picking up passenger {self.current_floor} at {self._ordinal(self.current_floor)} floor\n\n"
+                    )
+
                     cabin.append(self.current_floor)
 
-                self.log += f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
+                self._log(
+                    f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
+                )
 
                 for passenger in cabin:
                     destination = self.route[passenger]
 
                     if self.current_floor == destination or destination == self.IDLE:
-                        self.log += f"Removing passenger {passenger} at {self._ordinal(self.current_floor)} floor\n\n"
+
+                        self._log(
+                            f"Removing passenger {passenger} at {self._ordinal(self.current_floor)} floor\n\n"
+                        )
 
                         cabin.remove(passenger)
                         self.route.pop(passenger)
 
             self.status = self._get_status(self.IDLE)
-            self.log += f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
+
+            self._log(
+                f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
+            )
 
         self.status = self._get_status(self.IDLE)
-        self.log += f"\nTotal time: {elevator.time}s"
+
+        self._log(
+            f"\nTotal time: {elevator.time}s"
+        )
 
     def _goto_closest(self) -> int:
-        self.log += "Going to the closest passenger...\n\n"
+
+        self._log(
+            "Going to the closest passenger...\n\n"
+        )
 
         if self.current_floor in self.route:
             return self.current_floor
@@ -105,19 +128,40 @@ class Elevator():
 
         return f"{number}{suffix}"
 
+    def _log(self, log: str) -> None:
+        self.log += log
+
     def _get_status(self, status: int):
         return {1: "UP", 0: "IDLE", -1: "DOWN"}.get(status, "UNDER MAINTENANCE!")
 
-    def _set_floor_count(self, route: dict, floor_count: int):
+    def _set_start_floor(self, start_floor: int) -> int:
+        if start_floor < 1:
+            raise ValueError(
+                "start floor cannot be less than 1."
+            )
+
+        if isinstance(start_floor, int):
+            return start_floor
+
+        raise ValueError(
+            f"start floor should be an integer not {type(start_floor)}."
+        )
+
+    def _set_floor_count(self, route: dict, floor_count: int) -> int:
         if floor_count < max(route.values()):
             raise ValueError(
-                f"Number of floors cannot be less than destination floor.")
+                "destination floor cannot be greater than number of floors."
+            )
 
-        return floor_count
+        if isinstance(floor_count, int):
+            return floor_count
+
+        raise ValueError(
+            f"number of floors should be an integer not {type(floor_count)}."
+        )
 
 
-route = [(1, 5), (2, 4), (3, 1)]
-route = dict(route)
-elevator = Elevator(route, 5, 4)
+route = {1: 5, 2: 4, 3: 1}
+elevator = Elevator(route, 5, 1.1)
 elevator.elevate()
 print(elevator.log)
