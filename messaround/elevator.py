@@ -1,3 +1,4 @@
+import customtkinter
 
 
 class Elevator():
@@ -53,7 +54,7 @@ class Elevator():
             )
 
         self._log(
-            f"\nTotal time: {elevator.time}s"
+            f"\nTotal time: {self.time}s"
         )
 
     def _goto_closest(self) -> int:
@@ -139,8 +140,8 @@ class Elevator():
         self.log += log
 
     def _set_status(self, status: int):
-        self.status = {1: "UP", 0: "IDLE", -
-                       1: "DOWN"}.get(status, "UNDER MAINTENANCE!")
+        self.status = \
+            {1: "UP", 0: "IDLE", -1: "DOWN"}.get(status, "UNDER MAINTENANCE!")
 
     def _set_start_floor(self, start_floor: int) -> int:
         if start_floor < 1:
@@ -169,7 +170,85 @@ class Elevator():
         )
 
 
-route = {4: 5, 2: 4, 3: 1}
-elevator = Elevator(route, 5)
-elevator.elevate()
-print(elevator.log)
+def add_passenger():
+    passenger = entry_1.get()
+    destination = entry_2.get()
+
+    route[passenger] = destination
+
+    textbox_2.insert("end", f"{passenger}: {destination}, ")
+
+    clear_entries()
+
+
+def elevate():
+    pass
+
+
+def clear_route():
+    pass
+
+
+def clear_entries():
+    entry_1.delete(0, len(entry_1.get()))
+    entry_2.delete(0, len(entry_2.get()))
+
+
+if __name__ == "__main__":
+    route = {}
+    # elevator = Elevator(route, 5)
+
+    customtkinter.set_appearance_mode("dark")
+    customtkinter.set_default_color_theme("dark-blue")
+
+    app = customtkinter.CTk()
+    app.geometry(f"{600}x{700}")
+    app.title("Elevator Simulator")
+
+    font = customtkinter.CTkFont(family="consolas", size=16)
+
+    frame_1 = customtkinter.CTkFrame(
+        master=app, width=500, height=400, fg_color="transparent")
+    frame_1.grid(row=0, column=0, pady=20, padx=60)
+
+    label = customtkinter.CTkLabel(master=frame_1,
+                                   text="Elevator Logs",
+                                   font=font,
+                                   corner_radius=8)
+    label.grid(row=0, column=0)
+
+    textbox_1 = customtkinter.CTkTextbox(
+        frame_1, width=500, height=400, font=font)
+    textbox_1.grid(row=1, column=0)
+
+    textbox_2 = customtkinter.CTkTextbox(
+        frame_1, width=500, height=20, font=font)
+    textbox_2.grid(row=2, column=0, pady=20)
+
+    frame_2 = customtkinter.CTkFrame(master=app, fg_color="transparent")
+    frame_2.grid(row=1, column=0, padx=20)
+
+    entry_1 = customtkinter.CTkEntry(
+        master=frame_2, placeholder_text="Passenger")
+    entry_1.grid(row=0, column=0, pady=10, padx=10)
+
+    entry_2 = customtkinter.CTkEntry(
+        master=frame_2, placeholder_text="Destination")
+    entry_2.grid(row=0, column=1, pady=10, padx=10)
+
+    button_1 = customtkinter.CTkButton(
+        master=frame_2, command=add_passenger, text="Add")
+    button_1.grid(row=0, column=2, pady=10, padx=10)
+
+    frame_3 = customtkinter.CTkFrame(master=app, fg_color="transparent")
+    frame_3.grid(row=2, column=0, padx=40, pady=20)
+
+    button_2 = customtkinter.CTkButton(
+        master=frame_3, command=elevate, text="Elevate")
+    button_2.grid(row=0, column=0, pady=10, padx=10)
+
+    button_3 = customtkinter.CTkButton(
+        master=frame_3, command=clear_route, text="Clear")
+    button_3.grid(row=0, column=1, pady=10, padx=10)
+
+    app.mainloop()
