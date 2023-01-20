@@ -17,12 +17,13 @@ class Elevator():
         self.log = f"""\nPassengers waiting on floors: {list(route.keys())}
                     \nCurrent floor: {self.current_floor}\n\n"""
 
-        self.movement = 0
+        self.time = 0
 
     def elevate(self) -> None:
 
         if len(self.route) == 0:
-            self.log += f"\nTotal movements: {elevator.movement}"
+            self.log += f"\nTotal time: {elevator.time}s"
+            self.status = self._status_str(self.IDLE)
             return
 
         cabin = []
@@ -34,18 +35,18 @@ class Elevator():
 
         destination = self.route[self.current_floor]
 
-        self.status = self._get_status(destination)
+        self.status = self._get_direction(destination)
 
         self.log += f"status: {self._status_str(self.status)}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
 
         while len(cabin) != 0:
             self.current_floor += self.status
 
-            self.movement += 1
+            self.time += 1
 
             if self.current_floor in self.route \
-                    and (self._get_status(self.route[self.current_floor]) == self.status
-                         or self._get_status(self.route[self.current_floor]) == self.IDLE):
+                    and (self._get_direction(self.route[self.current_floor]) == self.status
+                         or self._get_direction(self.route[self.current_floor]) == self.IDLE):
 
                 self.log += f"Picking up passenger {self.current_floor} at {self._ordinal(self.current_floor)} floor\n\n"
                 cabin.append(self.current_floor)
@@ -78,7 +79,7 @@ class Elevator():
             up_probe += self.UP
             down_probe += self.DOWN
 
-            self.movement += 1
+            self.time += 1
 
             if up_probe in self.route:
                 return up_probe
@@ -86,7 +87,7 @@ class Elevator():
             if down_probe in self.route:
                 return down_probe
 
-    def _get_status(self, destination: int) -> int:
+    def _get_direction(self, destination: int) -> int:
 
         if self.current_floor == destination or destination == self.IDLE:
             return self.IDLE
