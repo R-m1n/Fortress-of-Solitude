@@ -1,3 +1,4 @@
+import random
 import customtkinter
 
 
@@ -9,7 +10,7 @@ class Elevator():
     def __init__(self, route: dict | list[tuple]) -> None:
         self.route = self._set_route(route)
 
-        self.floor_count = max(route.values())
+        self.floor_count = max(list(route.keys()) + list(route.values()))
 
         self.current_floor = 1
 
@@ -20,6 +21,7 @@ class Elevator():
         self.time = 0
 
     def elevate(self) -> None:
+
         self._log(f"""Passengers waiting on floors: {list(self.route.keys())}
                     \nCurrent floor: {self.current_floor}\n\n""")
 
@@ -80,7 +82,13 @@ class Elevator():
                 return down_probe
 
     def _deliver(self, cabin: list, direction: int) -> None:
+
+        if direction == self.IDLE:
+            self._stall(cabin[0])
+            return
+
         while len(cabin) != 0:
+
             self.current_floor += direction
 
             self.time += 1
@@ -96,6 +104,7 @@ class Elevator():
                     self.route.get(self.current_floor)) == self.IDLE
 
                 if is_same_direction or is_idle:
+
                     self._log(
                         f"Picking up passenger {self.current_floor} at {self._ordinal(self.current_floor)} floor\n\n"
                     )
@@ -106,7 +115,8 @@ class Elevator():
                 f"status: {self.status}\ncabin: {cabin}\nfloor: {self.current_floor}\n\n"
             )
 
-            for passenger in cabin:
+            for passenger in cabin.copy():
+
                 destination = self.route.get(passenger)
 
                 if self.current_floor == destination or destination == self.IDLE:
@@ -128,6 +138,13 @@ class Elevator():
 
         if self.current_floor < destination:
             return self.UP
+
+    def _stall(self, passenger: int):
+        self._log(
+            f"Removing passenger {passenger} at {self._ordinal(self.current_floor)} floor\n\n"
+        )
+
+        self.route.pop(passenger)
 
     def _ordinal(self, number: int) -> str:
         first_digit = number % 10
@@ -155,7 +172,11 @@ def add_passenger():
     passenger = int(entry_1.get())
     destination = int(entry_2.get())
 
-    route[passenger] = destination
+    if passenger != destination:
+        route[passenger] = destination
+
+    else:
+        route[passenger] = 0
 
     textbox_2.insert("end", f"{passenger} -> {destination}, ")
 
