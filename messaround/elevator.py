@@ -6,23 +6,22 @@ class Elevator():
     IDLE = 0
     DOWN = -1
 
-    DEFAULT_FLOOR = 1
+    def __init__(self, route: dict | list[tuple]) -> None:
+        self.route = self._set_route(route)
 
-    def __init__(self, route: dict | list[tuple], floor_count: int, start_floor: int = DEFAULT_FLOOR) -> None:
-        self.route = route if isinstance(route, dict) else dict(route)
+        self.floor_count = max(route.values())
 
-        self.floor_count = self._set_floor_count(route, floor_count)
-
-        self.current_floor = self._set_start_floor(start_floor)
+        self.current_floor = 1
 
         self._set_status(self.IDLE)
 
-        self.log = f"""\nPassengers waiting on floors: {list(route.keys())}
-                    \nCurrent floor: {self.current_floor}\n\n"""
+        self.log = ""
 
         self.time = 0
 
     def elevate(self) -> None:
+        self._log(f"""Passengers waiting on floors: {list(self.route.keys())}
+                    \nCurrent floor: {self.current_floor}\n\n""")
 
         while len(self.route) != 0:
             cabin = []
@@ -139,54 +138,48 @@ class Elevator():
     def _log(self, log: str) -> None:
         self.log += log
 
+    def _set_route(self, route: dict | list[tuple]) -> dict:
+        if len(route) == 0:
+            raise ValueError(
+                "empty route."
+            )
+
+        return route if isinstance(route, dict) else dict(route)
+
     def _set_status(self, status: int):
         self.status = \
             {1: "UP", 0: "IDLE", -1: "DOWN"}.get(status, "UNDER MAINTENANCE!")
 
-    def _set_start_floor(self, start_floor: int) -> int:
-        if start_floor < 1:
-            raise ValueError(
-                "start floor cannot be less than 1."
-            )
-
-        if isinstance(start_floor, int):
-            return start_floor
-
-        raise ValueError(
-            f"start floor should be an integer not {type(start_floor)}."
-        )
-
-    def _set_floor_count(self, route: dict, floor_count: int) -> int:
-        if floor_count < max(route.values()):
-            raise ValueError(
-                "destination floor cannot be greater than number of floors."
-            )
-
-        if isinstance(floor_count, int):
-            return floor_count
-
-        raise ValueError(
-            f"number of floors should be an integer not {type(floor_count)}."
-        )
-
 
 def add_passenger():
-    passenger = entry_1.get()
-    destination = entry_2.get()
+    passenger = int(entry_1.get())
+    destination = int(entry_2.get())
 
     route[passenger] = destination
 
-    textbox_2.insert("end", f"{passenger}: {destination}, ")
+    textbox_2.insert("end", f"{passenger} -> {destination}, ")
 
     clear_entries()
 
 
 def elevate():
-    pass
+    textbox_1.delete("0.0", "end")
+
+    try:
+        elevator = Elevator(route)
+        elevator.elevate()
+
+    except ValueError as ve:
+        textbox_1.insert("end", ve)
+
+    textbox_1.insert("0.0", elevator.log)
+
+    clear_route()
 
 
 def clear_route():
-    pass
+    textbox_2.delete("0.0", "end")
+    route.clear()
 
 
 def clear_entries():
@@ -196,7 +189,6 @@ def clear_entries():
 
 if __name__ == "__main__":
     route = {}
-    # elevator = Elevator(route, 5)
 
     customtkinter.set_appearance_mode("dark")
     customtkinter.set_default_color_theme("dark-blue")
@@ -212,7 +204,7 @@ if __name__ == "__main__":
     frame_1.grid(row=0, column=0, pady=20, padx=60)
 
     label = customtkinter.CTkLabel(master=frame_1,
-                                   text="Elevator Logs",
+                                   text="Event Logs",
                                    font=font,
                                    corner_radius=8)
     label.grid(row=0, column=0)
