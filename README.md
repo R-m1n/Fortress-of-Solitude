@@ -4,7 +4,7 @@
 
 &nbsp;
 
-## **_Here lies curious experiments of a random engineer._**
+## **_Here lies curious experiments of an almost forsaken tinker._**
 
 &nbsp;
 
