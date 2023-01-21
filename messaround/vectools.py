@@ -16,16 +16,16 @@ class Unit():
 
     def __repr__(self) -> str:
         if self.j > 0 and self.k > 0:
-            return f"{self.i}i - {self.j}j + {self.k}k"
+            return f"{self.i}i + {self.j}j + {self.k}k"
 
         elif self.j < 0 and self.k > 0:
-            return f"{self.i}i + {abs(self.j)}j + {self.k}k"
+            return f"{self.i}i - {abs(self.j)}j + {self.k}k"
 
         elif self.j > 0 and self.k < 0:
-            return f"{self.i}i - {self.j}j - {abs(self.k)}k"
+            return f"{self.i}i + {self.j}j - {abs(self.k)}k"
 
         elif self.j < 0 and self.k < 0:
-            return f"{self.i}i + {abs(self.j)}j - {abs(self.k)}k"
+            return f"{self.i}i - {abs(self.j)}j - {abs(self.k)}k"
 
 
 class Vector3():
@@ -37,12 +37,12 @@ class Vector3():
     def unit(self):
         return self * (1 / abs(self))
 
-    def cross(self, other) -> Unit:
+    def cross(self, other):
         i = (self.y * other.z) - (self.z * other.y)
-        j = (self.x * other.z) - (self.z * other.x)
+        j = -((self.x * other.z) - (self.z * other.x))
         k = (self.x * other.y) - (self.y * other.x)
 
-        return Unit(i, j, k)
+        return Vector3(i, j, k)
 
     def dist(self, other) -> float:
         return abs(Vector3(self.x - other.x, self.y - other.y, self.z - other.z))
@@ -50,8 +50,14 @@ class Vector3():
     def angle(self, other) -> float:
         return arccos((self * other) / (abs(self) * abs(other)))
 
-    def proj(self, other):
+    def project(self, other):
         return other * ((self * other) / (other * other))
+
+    def is_parallel(self, other):
+        return (self.cross(other)).unit() == 0
+
+    def is_perpendicular(self, other):
+        return self * other == 0
 
     def __str__(self) -> str:
         return f"Vector3({self.x}, {self.y}, {self.z})"
@@ -72,6 +78,13 @@ class Vector3():
         elif isinstance(other, int) or isinstance(other, float):
             return Vector3(other * self.x, other * self.y, other * self.z)
 
+    def __truediv__(self, other):
+        if isinstance(other, Vector3):
+            return self * (1 / abs(other))
+
+        elif isinstance(other, int) or isinstance(other, float):
+            return Vector3(self.x / other, self.y / other, self.z / other)
+
     def __eq__(self, other):
         return abs(self) == abs(other)
 
@@ -88,4 +101,4 @@ class Vector3():
 v1 = Vector3(2, 4, 5)
 v2 = Vector3(7, 2, 6)
 
-pprint(v1.proj(v2))
+pprint(v1 / v2)
