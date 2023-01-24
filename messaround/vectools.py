@@ -42,7 +42,7 @@ class Vector3():
         j = -((self.x * other.z) - (self.z * other.x))
         k = (self.x * other.y) - (self.y * other.x)
 
-        return Vector3(i, j, k)
+        return i + j + k
 
     def dist(self, other) -> float:
         return abs(Vector3(self.x - other.x, self.y - other.y, self.z - other.z))
@@ -54,7 +54,7 @@ class Vector3():
         return other * ((self * other) / (other * other))
 
     def is_parallel(self, other):
-        return (self.cross(other)).unit() == 0
+        return self.cross(other) == 0
 
     def is_perpendicular(self, other):
         return self * other == 0
@@ -101,4 +101,4 @@ class Vector3():
 v1 = Vector3(2, 4, 5)
 v2 = Vector3(7, 2, 6)
 
-pprint(v1 / v2)
+pprint(v1.cross(v2))
