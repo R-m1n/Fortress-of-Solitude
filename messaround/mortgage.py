@@ -47,10 +47,10 @@ class FixedMortgage(Mortgage):
 
         self.prepaid_interest = self.loan_amount * (points / 100)
 
-        self.point_cost = (self.loan_amount * (points / 100)) / points \
-            if points > 0 else 0
+        self.point_cost = self.prepaid_interest / points if points > 0 else 0
 
     def monthly_payment(self):
+
         numerator = self.monthly_interest * \
             (1 + self.monthly_interest) ** self.total_months
 
@@ -62,5 +62,22 @@ class FixedMortgage(Mortgage):
         pass
 
 
-fm = FixedMortgage(250_000, 4.25, 30, down_payment=0, points=2)
+class AdjustableMortgage(Mortgage):
+
+    def __init__(self, home_value: int | float, base_rate: float, loan_term: int, fixed_period: int, adjust_rate: float, down_payment: int | float = 0) -> None:
+
+        super().__init__(home_value, base_rate, loan_term, down_payment)
+
+        self.fixed_period = fixed_period
+
+        self.adjust_rate = adjust_rate
+
+    def monthly_payment(self):
+        pass
+
+    def calculate(self):
+        pass
+
+
+fm = FixedMortgage(250_000, 4.25, 30, down_payment=0, points=0)
 print(fm.monthly_payment())
