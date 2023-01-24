@@ -16,17 +16,20 @@ class Mortgage(ABC):
 
         self.total_months = loan_term * self.MONTHS
 
-    def annual_payment(self):
-        return round(self.monthly_payment() * self.MONTHS, 2)
-
-    def total_payment(self):
-        return round(self.monthly_payment() * self.total_months, 2)
-
-    def total_interest(self):
-        return round(self.total_payment() - self.loan_amount, 2)
-
     @abstractmethod
     def monthly_payment(self):
+        pass
+
+    @abstractmethod
+    def annual_payment(self):
+        pass
+
+    @abstractmethod
+    def total_payment(self):
+        pass
+
+    @abstractmethod
+    def total_interest(self):
         pass
 
     @abstractmethod
@@ -50,13 +53,21 @@ class FixedMortgage(Mortgage):
         self.point_cost = self.prepaid_interest / points if points > 0 else 0
 
     def monthly_payment(self):
-
         numerator = self.monthly_interest * \
             (1 + self.monthly_interest) ** self.total_months
 
         denominator = (1 + self.monthly_interest) ** self.total_months - 1
 
         return round(self.loan_amount * numerator / denominator, 2)
+
+    def annual_payment(self):
+        return round(self.monthly_payment() * self.MONTHS, 2)
+
+    def total_payment(self):
+        return round(self.monthly_payment() * self.total_months, 2)
+
+    def total_interest(self):
+        return round(self.total_payment() - self.loan_amount, 2)
 
     def calculate(self):
         pass
@@ -79,5 +90,5 @@ class AdjustableMortgage(Mortgage):
         pass
 
 
-fm = FixedMortgage(250_000, 4.25, 30, down_payment=0, points=0)
+fm = FixedMortgage(250_000, 4.25, 1, down_payment=0, points=0)
 print(fm.monthly_payment())
