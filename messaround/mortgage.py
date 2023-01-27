@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
 import functools
+import customtkinter
+from abc import ABC, abstractmethod
 
 
 class Mortgage(ABC):
@@ -19,7 +20,7 @@ class Mortgage(ABC):
 
         self.monthly_interest = self.interest_rate / self.MONTHS
 
-        self.total_months = loan_term * self.MONTHS
+        self.total_months = self.loan_term * self.MONTHS
 
     def total_interest(self):
         return round(self.total_payment() - self.loan_amount, 2)
@@ -120,8 +121,204 @@ class AdjustableMortgage(Mortgage):
 
 fm = FixedMortgage(250_000, 4.25 / 100, 30)
 
-am = AdjustableMortgage(250_000, 4.25 / 100, 30, 5, 0.25 / 100)
+# am = AdjustableMortgage(250_000, 4.25 / 100, 30, 5, 0.25 / 100)
 
 print(fm.monthly_payment())
-print(am.annual_payment())
-print(functools.reduce(lambda a, b: a + b, am.annual_payment()))
+
+if __name__ == "__min__":
+    customtkinter.set_appearance_mode("dark")
+    customtkinter.set_default_color_theme("dark-blue")
+
+    app = customtkinter.CTk()
+    app.geometry(f"{665}x{740}")
+    app.title("Mortgage Calculator")
+
+    font = customtkinter.CTkFont(family="consolas", size=16)
+
+    tabview = customtkinter.CTkTabview(app, width=565, height=665)
+    tabview.grid(row=0, column=2,
+                 padx=(20, 0), pady=(20, 0), sticky="nsew")
+
+    tabview.add("Fixed Mortgage")
+    tabview.add("Adjustable Mortgage")
+    tabview.set("Fixed Mortgage")
+
+    tabview.tab("Fixed Mortgage").grid_columnconfigure(0, weight=1)
+    tabview.tab("Adjustable Mortgage").grid_columnconfigure(0, weight=1)
+
+    # Fixed Mortgage Tab
+    frame_1 = customtkinter.CTkFrame(
+        tabview.tab("Fixed Mortgage"), width=500, height=400, fg_color="transparent")
+    frame_1.grid(row=0, column=0, pady=20, padx=60)
+
+    textbox_1 = customtkinter.CTkTextbox(
+        frame_1, width=500, height=400, font=font)
+    textbox_1.grid(row=0, column=0)
+
+    frame_2 = customtkinter.CTkFrame(
+        tabview.tab("Fixed Mortgage"), fg_color="transparent")
+    frame_2.grid(row=1, column=0, padx=20)
+
+    home_value_1 = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Home Value")
+    home_value_1.grid(row=0, column=0, pady=10, padx=5)
+
+    label_1 = customtkinter.CTkLabel(
+        frame_2, text="$")
+    label_1.grid(row=0, column=1, pady=10, padx=5)
+
+    space_1 = customtkinter.CTkLabel(
+        frame_2, text="", width=100)
+    space_1.grid(row=0, column=2, pady=10, padx=5)
+
+    loan_term_1 = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Loan Term")
+    loan_term_1.grid(row=0, column=3, pady=10, padx=5)
+
+    label_2 = customtkinter.CTkLabel(
+        frame_2, text="year(s)")
+    label_2.grid(row=0, column=4, pady=10, padx=5)
+
+    interest_rate_1 = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Interest Rate")
+    interest_rate_1.grid(row=1, column=0, pady=10, padx=5)
+
+    label_3 = customtkinter.CTkLabel(
+        frame_2, text="%")
+    label_3.grid(row=1, column=1, pady=10, padx=5)
+
+    space_2 = customtkinter.CTkLabel(
+        frame_2, text="", width=100)
+    space_2.grid(row=1, column=2, pady=10, padx=5)
+
+    down_payment_1 = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Down Payment")
+    down_payment_1.grid(row=1, column=3, pady=10, padx=5)
+
+    unit_1 = customtkinter.CTkComboBox(
+        frame_2, values=["%", "$"], width=50)
+    unit_1.grid(row=1, column=4, pady=10, padx=5)
+    unit_1.set("%")
+
+    frame_3 = customtkinter.CTkFrame(
+        tabview.tab("Fixed Mortgage"), fg_color="transparent")
+    frame_3.grid(row=2, column=0, pady=20, padx=20)
+
+    calculate_1 = customtkinter.CTkButton(
+        frame_3, command=lambda i: i, text="Calculate")
+    calculate_1.grid(row=0, column=0, pady=10, padx=10)
+
+    clear_2 = customtkinter.CTkButton(
+        frame_3, command=lambda i: i, text="Clear")
+    clear_2.grid(row=0, column=1, pady=10, padx=10)
+
+    space_3 = customtkinter.CTkLabel(
+        frame_3, text="", width=50)
+    space_3.grid(row=0, column=2, pady=10, padx=5)
+
+    label_4 = customtkinter.CTkLabel(
+        frame_3, text="Points:")
+    label_4.grid(row=0, column=3, pady=10, padx=5)
+
+    points = customtkinter.CTkComboBox(
+        frame_3, values=[str(i) for i in range(11)], width=50)
+    points.grid(row=0, column=4, pady=10, padx=10)
+    points.set("0")
+
+    # Adjustable Mortgage Tab
+    frame_1 = customtkinter.CTkFrame(
+        tabview.tab("Adjustable Mortgage"), width=500, height=400, fg_color="transparent")
+    frame_1.grid(row=0, column=0, pady=20, padx=60)
+
+    textbox_1 = customtkinter.CTkTextbox(
+        frame_1, width=500, height=400, font=font)
+    textbox_1.grid(row=0, column=0)
+
+    frame_2 = customtkinter.CTkFrame(
+        tabview.tab("Adjustable Mortgage"), fg_color="transparent")
+    frame_2.grid(row=1, column=0, padx=20)
+
+    home_value_2 = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Home Value")
+    home_value_2.grid(row=0, column=0, pady=10, padx=5)
+
+    label_1 = customtkinter.CTkLabel(
+        frame_2, text="$")
+    label_1.grid(row=0, column=1, pady=10, padx=5)
+
+    space_1 = customtkinter.CTkLabel(
+        frame_2, text="", width=100)
+    space_1.grid(row=0, column=2, pady=10, padx=5)
+
+    loan_term_2 = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Loan Term")
+    loan_term_2.grid(row=0, column=3, pady=10, padx=5)
+
+    label_2 = customtkinter.CTkLabel(
+        frame_2, text="year(s)")
+    label_2.grid(row=0, column=4, pady=10, padx=5)
+
+    interest_rate_2 = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Base Rate")
+    interest_rate_2.grid(row=1, column=0, pady=10, padx=5)
+
+    label_3 = customtkinter.CTkLabel(
+        frame_2, text="%")
+    label_3.grid(row=1, column=1, pady=10, padx=5)
+
+    space_2 = customtkinter.CTkLabel(
+        frame_2, text="", width=100)
+    space_2.grid(row=1, column=2, pady=10, padx=5)
+
+    down_payment_2 = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Down Payment")
+    down_payment_2.grid(row=1, column=3, pady=10, padx=5)
+
+    unit_2 = customtkinter.CTkComboBox(
+        frame_2, values=["%", "$"], width=50)
+    unit_2.grid(row=1, column=4, pady=10, padx=5)
+    unit_2.set("%")
+
+    frame_3 = customtkinter.CTkFrame(
+        tabview.tab("Adjustable Mortgage"), fg_color="transparent")
+    frame_3.grid(row=2, column=0, pady=10, padx=20)
+
+    frame_4 = customtkinter.CTkFrame(
+        frame_3, fg_color="transparent")
+    frame_4.grid(row=0, column=0)
+
+    calculate_2 = customtkinter.CTkButton(
+        frame_4, command=lambda i: i, text="Calculate")
+    calculate_2.grid(row=0, column=0, pady=10, padx=10)
+
+    clear_2 = customtkinter.CTkButton(
+        frame_4, command=lambda i: i, text="Clear")
+    clear_2.grid(row=1, column=0, pady=10, padx=10)
+
+    space_3 = customtkinter.CTkLabel(
+        frame_4, text="", width=170)
+    space_3.grid(row=0, column=2, pady=10, padx=5)
+
+    frame_5 = customtkinter.CTkFrame(
+        frame_3, fg_color="transparent")
+    frame_5.grid(row=0, column=1)
+
+    label_4 = customtkinter.CTkLabel(
+        frame_5, text="Adjust Rate:")
+    label_4.grid(row=0, column=0, pady=10, padx=5)
+
+    adjust_rate = customtkinter.CTkComboBox(
+        frame_5, values=[str(i / 100) for i in range(25, 201, 25)], width=65)
+    adjust_rate.grid(row=0, column=1, padx=5)
+    adjust_rate.set("0.25")
+
+    label_6 = customtkinter.CTkLabel(
+        frame_5, text="Fixed Period:")
+    label_6.grid(row=1, column=0, padx=5)
+
+    fixed_period = customtkinter.CTkComboBox(
+        frame_5, values=[str(i) for i in range(11)], width=65)
+    fixed_period.grid(row=1, column=1, padx=5)
+    fixed_period.set("0")
+
+    app.mainloop()
