@@ -6,7 +6,7 @@ class Elevator():
     IDLE = 0
     DOWN = -1
 
-    def __init__(self, route: dict | list[tuple]) -> None:
+    def __init__(self, route: dict | list[tuple[int, int]]) -> None:
         self.route = self._set_route(route)
 
         self.floor_count = max(list(route.keys()) + list(route.values()))
@@ -80,14 +80,13 @@ class Elevator():
             if down_probe in self.route:
                 return down_probe
 
-    def _deliver(self, cabin: list, direction: int) -> None:
+    def _deliver(self, cabin: list[int], direction: int) -> None:
 
         if direction == self.IDLE:
             self._stall(cabin[0])
             return
 
         while len(cabin) != 0:
-
             self.current_floor += direction
 
             self.time += 1
@@ -115,16 +114,13 @@ class Elevator():
             )
 
             for passenger in cabin.copy():
-
                 destination = self.route.get(passenger)
 
                 if self.current_floor == destination or destination == self.IDLE:
-
                     self._stall(passenger)
                     cabin.remove(passenger)
 
     def _get_direction(self, destination: int) -> int:
-
         if self.current_floor == destination or destination == self.IDLE:
             return self.IDLE
 
@@ -134,10 +130,10 @@ class Elevator():
         if self.current_floor < destination:
             return self.UP
 
-    def _stall(self, passenger: int):
+    def _stall(self, passenger: int) -> None:
 
         self._log(
-            f"Removing passenger {passenger} at {self._ordinal(self.current_floor)} floor\n\n"
+            f"Delivering passenger {passenger} at {self._ordinal(self.current_floor)} floor\n\n"
         )
 
         self.route.pop(passenger)
@@ -151,7 +147,7 @@ class Elevator():
     def _log(self, log: str) -> None:
         self.log += log
 
-    def _set_route(self, route: dict | list[tuple]) -> dict:
+    def _set_route(self, route: dict | list[tuple[int, int]]) -> dict:
         if len(route) == 0:
             raise ValueError(
                 "empty route."
@@ -164,9 +160,12 @@ class Elevator():
             {1: "UP", 0: "IDLE", -1: "DOWN"}.get(status, "UNDER MAINTENANCE!")
 
 
-def add_passenger():
-    passenger = int(entry_1.get()) if entry_1.get() != '' else 1
-    destination = int(entry_2.get()) if entry_2.get() != '' else 0
+def add_button_callback() -> None:
+    passenger = int(passenger_entry.get()) \
+        if passenger_entry.get() != '' else 1
+
+    destination = int(destination_entry.get()) \
+        if destination_entry.get() != '' else 0
 
     if passenger in route:
         clear_entries()
@@ -178,37 +177,42 @@ def add_passenger():
     else:
         route[passenger] = 0
 
-    textbox_2.insert("end", f"{passenger} -> {destination}, ")
+    record_textbox.insert("end", f"{passenger} -> {destination}, ")
 
     clear_entries()
 
 
-def elevate():
-    textbox_1.delete("0.0", "end")
+def elevate_button_callback() -> None:
+    log_textbox.delete("0.0", "end")
 
     try:
         elevator = Elevator(route)
         elevator.elevate()
 
     except ValueError as ve:
-        textbox_1.insert("end", ve)
+        log_textbox.insert("end", ve)
 
-    textbox_1.insert("0.0", elevator.log)
+    log_textbox.insert("0.0", elevator.log)
 
     clear_route()
 
 
-def clear_route():
-    textbox_2.delete("0.0", "end")
+def clear_route() -> None:
+    record_textbox.delete("0.0", "end")
     route.clear()
 
 
-def clear_entries():
-    entry_1.delete(0, len(entry_1.get()))
-    entry_2.delete(0, len(entry_2.get()))
+def clear_button_callback() -> None:
+    log_textbox.delete("0.0", "end")
+    clear_route()
 
 
-if __name__ == "__man__":
+def clear_entries() -> None:
+    passenger_entry.delete(0, len(passenger_entry.get()))
+    destination_entry.delete(0, len(destination_entry.get()))
+
+
+if __name__ == "__main__":
     route = {}
 
     customtkinter.set_appearance_mode("dark")
@@ -221,47 +225,47 @@ if __name__ == "__man__":
     font = customtkinter.CTkFont(family="consolas", size=16)
 
     frame_1 = customtkinter.CTkFrame(
-        master=app, width=500, height=400, fg_color="transparent")
+        app, width=500, height=400, fg_color="transparent")
     frame_1.grid(row=0, column=0, pady=20, padx=60)
 
-    label = customtkinter.CTkLabel(master=frame_1,
+    label = customtkinter.CTkLabel(frame_1,
                                    text="Event Logs",
                                    font=font,
                                    corner_radius=8)
     label.grid(row=0, column=0)
 
-    textbox_1 = customtkinter.CTkTextbox(
+    log_textbox = customtkinter.CTkTextbox(
         frame_1, width=500, height=400, font=font)
-    textbox_1.grid(row=1, column=0)
+    log_textbox.grid(row=1, column=0)
 
-    textbox_2 = customtkinter.CTkTextbox(
+    record_textbox = customtkinter.CTkTextbox(
         frame_1, width=500, height=20, font=font)
-    textbox_2.grid(row=2, column=0, pady=20)
+    record_textbox.grid(row=2, column=0, pady=20)
 
-    frame_2 = customtkinter.CTkFrame(master=app, fg_color="transparent")
+    frame_2 = customtkinter.CTkFrame(app, fg_color="transparent")
     frame_2.grid(row=1, column=0, padx=20)
 
-    entry_1 = customtkinter.CTkEntry(
-        master=frame_2, placeholder_text="Passenger")
-    entry_1.grid(row=0, column=0, pady=10, padx=10)
+    passenger_entry = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Passenger")
+    passenger_entry.grid(row=0, column=0, pady=10, padx=10)
 
-    entry_2 = customtkinter.CTkEntry(
-        master=frame_2, placeholder_text="Destination")
-    entry_2.grid(row=0, column=1, pady=10, padx=10)
+    destination_entry = customtkinter.CTkEntry(
+        frame_2, placeholder_text="Destination")
+    destination_entry.grid(row=0, column=1, pady=10, padx=10)
 
-    button_1 = customtkinter.CTkButton(
-        master=frame_2, command=add_passenger, text="Add")
-    button_1.grid(row=0, column=2, pady=10, padx=10)
+    add_button = customtkinter.CTkButton(
+        frame_2, command=add_button_callback, text="Add")
+    add_button.grid(row=0, column=2, pady=10, padx=10)
 
-    frame_3 = customtkinter.CTkFrame(master=app, fg_color="transparent")
+    frame_3 = customtkinter.CTkFrame(app, fg_color="transparent")
     frame_3.grid(row=2, column=0, padx=40, pady=20)
 
-    button_2 = customtkinter.CTkButton(
-        master=frame_3, command=elevate, text="Elevate")
-    button_2.grid(row=0, column=0, pady=10, padx=10)
+    elevate_button = customtkinter.CTkButton(
+        frame_3, command=elevate_button_callback, text="Elevate")
+    elevate_button.grid(row=0, column=0, pady=10, padx=10)
 
-    button_3 = customtkinter.CTkButton(
-        master=frame_3, command=clear_route, text="Clear")
-    button_3.grid(row=0, column=1, pady=10, padx=10)
+    clear_button = customtkinter.CTkButton(
+        frame_3, command=clear_button_callback, text="Clear")
+    clear_button.grid(row=0, column=1, pady=10, padx=10)
 
     app.mainloop()
