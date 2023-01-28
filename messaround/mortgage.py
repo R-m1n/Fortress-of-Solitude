@@ -72,7 +72,7 @@ class FixedMortgage(Mortgage):
 
     def calculate(self):
         log = ""
-        log += f"Home Value: {float(self.home_value)}$\n\n"
+        log += f"Home Value:\t\t{float(self.home_value)}$\n\n"
         log += 47 * "="
         log += f"\n\nInterest Rate:\t\t{round(self.interest_rate * 100, 2)}%\nLoan Term:\t\t{self.loan_term} year(s)\nDown Payment:\t\t{self.down_payment}$\n"
 
@@ -134,25 +134,25 @@ class AdjustableMortgage(Mortgage):
 
     def calculate(self):
         log = ""
-        log += f"Home Value: {float(self.home_value)}$\n\n"
+        log += f"Home Value:\t\t{float(self.home_value)}$\n\n"
         log += 47 * "="
         log += f"\n\nBase Rate:\t\t{round(self.interest_rate * 100, 2)}%\nLoan Term:\t\t{self.loan_term} year(s)\nDown Payment:\t\t{self.down_payment}$\n"
 
-        log += f"\nFixed Period:\t\t{self.fixed_period} year(s)\nAdjust Rate:\t\t{round(self.adjust_rate * 100, 2)}%\nAdjust Interval:\tAnnual\n"
+        log += f"\nFixed Period:\t\t {self.fixed_period} year(s)\nAdjust Rate:\t\t {round(self.adjust_rate * 100, 2)}%\nAdjust Interval:\tAnnual\n\n"
 
         log += 47 * "-"
 
-        log += f"\n\nMonthly Payment:\n"
+        log += f"\n\nMonthly Payments:\n"
         monthly_payment = self.monthly_payment()
         for month in range(1, self.loan_term * self.MONTHS, self.MONTHS):
-            log += f"{month}\t-\t{month + (self.MONTHS - 1)}\t{monthly_payment[month]}\n"
+            log += f"{month}-{month + (self.MONTHS - 1)}\t\t{monthly_payment[month]}$\n"
 
         log += "\n"
 
-        log += f"Annual Payment:\n"
+        log += f"Annual Payments:\n"
         annual_payment = self.annual_payment()
         for year in range(1, self.loan_term + 1):
-            log += f"{year}\t{annual_payment[year - 1]}\n"
+            log += f"{year}\t\t{annual_payment[year - 1]}$\n"
 
         log += "\n"
 
@@ -164,10 +164,6 @@ class AdjustableMortgage(Mortgage):
 
         return log
 
-
-# fm = FixedMortgage(250_000, 4.25 / 100, 30, 0, 2)
-
-# am = AdjustableMortgage(250_000, 4.25 / 100, 30, 5, 0.25 / 100)
 
 def fixed_calculate_callback():
     textbox_1.delete("0.0", "end")
@@ -232,10 +228,31 @@ def adjustable_calculate_callback():
                                              float(base_rate) / 100,
                                              int(loan_term),
                                              int(fixed_period.get()),
-                                             float(adjust_rate.get()),
+                                             float(adjust_rate.get()) / 100,
                                              float(down_payment))
 
     textbox_2.insert("0.0", adjustable_mortgage.calculate())
+
+
+def fixed_clear_callback():
+    textbox_1.delete("0.0", "end")
+    home_value_1.delete("0", "end")
+    loan_term_1.delete("0", "end")
+    interest_rate_1.delete("0", "end")
+    down_payment_1.delete("0", "end")
+    unit_1.set("$")
+    points.set("0")
+
+
+def adjustable_clear_callback():
+    textbox_2.delete("0.0", "end")
+    home_value_2.delete("0", "end")
+    loan_term_2.delete("0", "end")
+    interest_rate_2.delete("0", "end")
+    down_payment_2.delete("0", "end")
+    unit_2.set("$")
+    adjust_rate.set("0.25")
+    fixed_period.set("0")
 
 
 if __name__ == "__main__":
@@ -321,9 +338,9 @@ if __name__ == "__main__":
         frame_3, command=fixed_calculate_callback, text="Calculate")
     calculate_1.grid(row=0, column=0, pady=10, padx=10)
 
-    clear_2 = customtkinter.CTkButton(
-        frame_3, command=lambda i: i, text="Clear")
-    clear_2.grid(row=0, column=1, pady=10, padx=10)
+    clear_1 = customtkinter.CTkButton(
+        frame_3, command=fixed_clear_callback, text="Clear")
+    clear_1.grid(row=0, column=1, pady=10, padx=10)
 
     space_3 = customtkinter.CTkLabel(
         frame_3, text="", width=50)
@@ -405,7 +422,7 @@ if __name__ == "__main__":
     calculate_2.grid(row=0, column=0, pady=10, padx=10)
 
     clear_2 = customtkinter.CTkButton(
-        frame_4, command=lambda i: i, text="Clear")
+        frame_4, command=adjustable_clear_callback, text="Clear")
     clear_2.grid(row=1, column=0, pady=10, padx=10)
 
     space_3 = customtkinter.CTkLabel(
