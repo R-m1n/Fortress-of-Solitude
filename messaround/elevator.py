@@ -6,7 +6,7 @@ class Elevator():
     IDLE = 0
     DOWN = -1
 
-    def __init__(self, route: dict | list[tuple[int, int]]) -> None:
+    def __init__(self, route: dict[int, int] | list[tuple[int, int]]) -> None:
         self.route = self._set_route(route)
 
         self.floor_count = max(list(route.keys()) + list(route.values()))
@@ -27,7 +27,7 @@ class Elevator():
         while len(self.route) != 0:
             cabin = []
 
-            self.current_floor = self._goto_closest()
+            self._goto_closest()
 
             self._log(
                 f"Picking up passenger {self.current_floor} at {self._ordinal(self.current_floor)} floor\n\n"
@@ -57,14 +57,14 @@ class Elevator():
             f"\nTotal time: {self.time}s"
         )
 
-    def _goto_closest(self) -> int:
+    def _goto_closest(self) -> None:
 
         self._log(
             "Going to the closest passenger...\n\n"
         )
 
         if self.current_floor in self.route:
-            return self.current_floor
+            return
 
         up_probe = down_probe = self.current_floor
 
@@ -75,10 +75,12 @@ class Elevator():
             self.time += 1
 
             if up_probe in self.route:
-                return up_probe
+                self.current_floor = up_probe
+                return
 
             if down_probe in self.route:
-                return down_probe
+                self.current_floor = down_probe
+                return
 
     def _deliver(self, cabin: list[int], direction: int) -> None:
 
@@ -147,7 +149,7 @@ class Elevator():
     def _log(self, log: str) -> None:
         self.log += log
 
-    def _set_route(self, route: dict | list[tuple[int, int]]) -> dict:
+    def _set_route(self, route: dict[int, int] | list[tuple[int, int]]) -> dict[int, int]:
         if len(route) == 0:
             raise ValueError(
                 "empty route."
@@ -155,7 +157,7 @@ class Elevator():
 
         return route if isinstance(route, dict) else dict(route)
 
-    def _set_status(self, status: int):
+    def _set_status(self, status: int) -> None:
         self.status = \
             {1: "UP", 0: "IDLE", -1: "DOWN"}.get(status, "UNDER MAINTENANCE!")
 
@@ -228,10 +230,8 @@ if __name__ == "__main__":
         app, width=500, height=400, fg_color="transparent")
     frame_1.grid(row=0, column=0, pady=20, padx=60)
 
-    label = customtkinter.CTkLabel(frame_1,
-                                   text="Event Logs",
-                                   font=font,
-                                   corner_radius=8)
+    label = customtkinter.CTkLabel(
+        frame_1, text="Event Logs", font=font, corner_radius=8)
     label.grid(row=0, column=0)
 
     log_textbox = customtkinter.CTkTextbox(
