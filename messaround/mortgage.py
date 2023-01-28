@@ -9,8 +9,7 @@ class Mortgage(ABC):
     def __init__(self, home_value: int | float, interest_rate: float, loan_term: int, down_payment: int | float = 0) -> None:
         self.home_value = home_value
 
-        self.down_payment = self.home_value * (down_payment / 100) \
-            if down_payment < 100 else down_payment
+        self.down_payment = down_payment
 
         self.interest_rate = interest_rate
 
@@ -72,7 +71,25 @@ class FixedMortgage(Mortgage):
         return round(self.monthly_payment() * self.total_months, 2)
 
     def calculate(self):
-        pass
+        log = ""
+        log += f"Home Value: {float(self.home_value)}$\n\n"
+        log += 47 * "="
+        log += f"\n\nInterest Rate:\t\t{round(self.interest_rate * 100, 2)}%\nLoan Term:\t\t{self.loan_term} year(s)\nDown Payment:\t\t{self.down_payment}$\n"
+
+        if self.points != 0:
+            log += f"\nPoints:\t\t\t{self.points}\nRate Discount:\t\t\t{(self.points * self.DISCOUNT_PER_POINT) * 100}%"
+            log += f"\nPre-Paid Interest:\t\t\t{self.prepaid_interest}$\nPoint Cost:\t\t\t{self.point_cost}$\n\n"
+
+        log += 47 * "-"
+        log += f"\n\nMonthly Payment:\t{self.monthly_payment()}$\n"
+        log += f"Annual Payment:\t\t{self.annual_payment()}$\n\n"
+        log += f"Loan Amount:\t\t {self.loan_amount}$\n"
+        log += f"Total Interest:\t\t{self.total_interest()}$\n"
+        log += 26 * "-"
+        log += f"\nTotal Payment:\t\t {self.total_payment()}$\n\n"
+        log += 47 * "="
+
+        return log
 
 
 class AdjustableMortgage(Mortgage):
@@ -119,13 +136,47 @@ class AdjustableMortgage(Mortgage):
         pass
 
 
-fm = FixedMortgage(250_000, 4.25 / 100, 30)
+# fm = FixedMortgage(250_000, 4.25 / 100, 30, 0, 2)
 
 # am = AdjustableMortgage(250_000, 4.25 / 100, 30, 5, 0.25 / 100)
 
-print(fm.monthly_payment())
+# print(fm.calculate())
 
-if __name__ == "__min__":
+def fixed_calculate_callback():
+    textbox_1.delete("0.0", "end")
+    home_value = home_value_1.get()
+
+    if home_value == '':
+        textbox_1.insert("0.0", "Please enter the Home Value!")
+        return
+
+    loan_term = loan_term_1.get()
+
+    if loan_term == '':
+        textbox_1.insert("0.0", "Please enter the Loan Term!")
+        return
+
+    interest_rate = interest_rate_1.get()
+
+    if interest_rate == '':
+        textbox_1.insert("0.0", "Please enter the Interest Rate!")
+        return
+
+    down_payment = down_payment_1.get() if down_payment_1.get() != '' else 0
+
+    if unit_1.get() == "%":
+        down_payment = float(home_value) * (float(down_payment) / 100)
+
+    fixed_mortgage = FixedMortgage(float(home_value),
+                                   float(interest_rate) / 100,
+                                   int(loan_term),
+                                   float(down_payment),
+                                   int(points.get()))
+
+    textbox_1.insert("0.0", fixed_mortgage.calculate())
+
+
+if __name__ == "__main__":
     customtkinter.set_appearance_mode("dark")
     customtkinter.set_default_color_theme("dark-blue")
 
@@ -196,16 +247,16 @@ if __name__ == "__min__":
     down_payment_1.grid(row=1, column=3, pady=10, padx=5)
 
     unit_1 = customtkinter.CTkComboBox(
-        frame_2, values=["%", "$"], width=50)
+        frame_2, values=["$", "%"], width=50)
     unit_1.grid(row=1, column=4, pady=10, padx=5)
-    unit_1.set("%")
+    unit_1.set("$")
 
     frame_3 = customtkinter.CTkFrame(
         tabview.tab("Fixed Mortgage"), fg_color="transparent")
     frame_3.grid(row=2, column=0, pady=20, padx=20)
 
     calculate_1 = customtkinter.CTkButton(
-        frame_3, command=lambda i: i, text="Calculate")
+        frame_3, command=fixed_calculate_callback, text="Calculate")
     calculate_1.grid(row=0, column=0, pady=10, padx=10)
 
     clear_2 = customtkinter.CTkButton(
@@ -230,9 +281,9 @@ if __name__ == "__min__":
         tabview.tab("Adjustable Mortgage"), width=500, height=400, fg_color="transparent")
     frame_1.grid(row=0, column=0, pady=20, padx=60)
 
-    textbox_1 = customtkinter.CTkTextbox(
+    textbox_2 = customtkinter.CTkTextbox(
         frame_1, width=500, height=400, font=font)
-    textbox_1.grid(row=0, column=0)
+    textbox_2.grid(row=0, column=0)
 
     frame_2 = customtkinter.CTkFrame(
         tabview.tab("Adjustable Mortgage"), fg_color="transparent")
