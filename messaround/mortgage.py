@@ -156,10 +156,10 @@ class AdjustableMortgage(Mortgage):
 
         log += "\n"
 
-        log += f"Loan Amount:\t\t{float(self.loan_amount)}$\n"
+        log += f"Loan Amount:\t\t {float(self.loan_amount)}$\n"
         log += f"Total Interest:\t\t{self.total_interest()}$\n"
         log += 34 * "-"
-        log += f"\nTotal Payment:\t\t{self.total_payment()}$\n\n"
+        log += f"\nTotal Payment:\t\t {self.total_payment()}$\n\n"
         log += 47 * "="
 
         return log
@@ -167,10 +167,7 @@ class AdjustableMortgage(Mortgage):
 
 # fm = FixedMortgage(250_000, 4.25 / 100, 30, 0, 2)
 
-am = AdjustableMortgage(250_000, 4.25 / 100, 30, 5, 0.25 / 100)
-
-print(am.calculate())
-
+# am = AdjustableMortgage(250_000, 4.25 / 100, 30, 5, 0.25 / 100)
 
 def fixed_calculate_callback():
     textbox_1.delete("0.0", "end")
@@ -206,7 +203,42 @@ def fixed_calculate_callback():
     textbox_1.insert("0.0", fixed_mortgage.calculate())
 
 
-if __name__ == "__min__":
+def adjustable_calculate_callback():
+    textbox_2.delete("0.0", "end")
+    home_value = home_value_2.get()
+
+    if home_value == '':
+        textbox_2.insert("0.0", "Please enter the Home Value!")
+        return
+
+    loan_term = loan_term_2.get()
+
+    if loan_term == '':
+        textbox_2.insert("0.0", "Please enter the Loan Term!")
+        return
+
+    base_rate = interest_rate_2.get()
+
+    if base_rate == '':
+        textbox_2.insert("0.0", "Please enter the Interest Rate!")
+        return
+
+    down_payment = down_payment_2.get() if down_payment_2.get() != '' else 0
+
+    if unit_2.get() == "%":
+        down_payment = float(home_value) * (float(down_payment) / 100)
+
+    adjustable_mortgage = AdjustableMortgage(float(home_value),
+                                             float(base_rate) / 100,
+                                             int(loan_term),
+                                             int(fixed_period.get()),
+                                             float(adjust_rate.get()),
+                                             float(down_payment))
+
+    textbox_2.insert("0.0", adjustable_mortgage.calculate())
+
+
+if __name__ == "__main__":
     customtkinter.set_appearance_mode("dark")
     customtkinter.set_default_color_theme("dark-blue")
 
@@ -356,9 +388,9 @@ if __name__ == "__min__":
     down_payment_2.grid(row=1, column=3, pady=10, padx=5)
 
     unit_2 = customtkinter.CTkComboBox(
-        frame_2, values=["%", "$"], width=50)
+        frame_2, values=["$", "%"], width=50)
     unit_2.grid(row=1, column=4, pady=10, padx=5)
-    unit_2.set("%")
+    unit_2.set("$")
 
     frame_3 = customtkinter.CTkFrame(
         tabview.tab("Adjustable Mortgage"), fg_color="transparent")
@@ -369,7 +401,7 @@ if __name__ == "__min__":
     frame_4.grid(row=0, column=0)
 
     calculate_2 = customtkinter.CTkButton(
-        frame_4, command=lambda i: i, text="Calculate")
+        frame_4, command=adjustable_calculate_callback, text="Calculate")
     calculate_2.grid(row=0, column=0, pady=10, padx=10)
 
     clear_2 = customtkinter.CTkButton(
