@@ -83,7 +83,7 @@ class FixedMortgage(Mortgage):
         log += 47 * "-"
         log += f"\n\nMonthly Payment:\t{self.monthly_payment()}$\n"
         log += f"Annual Payment:\t\t{self.annual_payment()}$\n\n"
-        log += f"Loan Amount:\t\t {self.loan_amount}$\n"
+        log += f"Loan Amount:\t\t {float(self.loan_amount)}$\n"
         log += f"Total Interest:\t\t{self.total_interest()}$\n"
         log += 26 * "-"
         log += f"\nTotal Payment:\t\t {self.total_payment()}$\n\n"
@@ -133,14 +133,44 @@ class AdjustableMortgage(Mortgage):
         return round(functools.reduce(lambda a, b: a + b, self.monthly_payment()), 2)
 
     def calculate(self):
-        pass
+        log = ""
+        log += f"Home Value: {float(self.home_value)}$\n\n"
+        log += 47 * "="
+        log += f"\n\nBase Rate:\t\t{round(self.interest_rate * 100, 2)}%\nLoan Term:\t\t{self.loan_term} year(s)\nDown Payment:\t\t{self.down_payment}$\n"
+
+        log += f"\nFixed Period:\t\t{self.fixed_period} year(s)\nAdjust Rate:\t\t{round(self.adjust_rate * 100, 2)}%\nAdjust Interval:\tAnnual\n"
+
+        log += 47 * "-"
+
+        log += f"\n\nMonthly Payment:\n"
+        monthly_payment = self.monthly_payment()
+        for month in range(1, self.loan_term * self.MONTHS, self.MONTHS):
+            log += f"{month}\t-\t{month + (self.MONTHS - 1)}\t{monthly_payment[month]}\n"
+
+        log += "\n"
+
+        log += f"Annual Payment:\n"
+        annual_payment = self.annual_payment()
+        for year in range(1, self.loan_term + 1):
+            log += f"{year}\t{annual_payment[year - 1]}\n"
+
+        log += "\n"
+
+        log += f"Loan Amount:\t\t{float(self.loan_amount)}$\n"
+        log += f"Total Interest:\t\t{self.total_interest()}$\n"
+        log += 34 * "-"
+        log += f"\nTotal Payment:\t\t{self.total_payment()}$\n\n"
+        log += 47 * "="
+
+        return log
 
 
 # fm = FixedMortgage(250_000, 4.25 / 100, 30, 0, 2)
 
-# am = AdjustableMortgage(250_000, 4.25 / 100, 30, 5, 0.25 / 100)
+am = AdjustableMortgage(250_000, 4.25 / 100, 30, 5, 0.25 / 100)
 
-# print(fm.calculate())
+print(am.calculate())
+
 
 def fixed_calculate_callback():
     textbox_1.delete("0.0", "end")
@@ -176,7 +206,7 @@ def fixed_calculate_callback():
     textbox_1.insert("0.0", fixed_mortgage.calculate())
 
 
-if __name__ == "__main__":
+if __name__ == "__min__":
     customtkinter.set_appearance_mode("dark")
     customtkinter.set_default_color_theme("dark-blue")
 
