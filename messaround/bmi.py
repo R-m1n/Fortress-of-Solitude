@@ -1,22 +1,17 @@
 import customtkinter
 
 
-def button_callback():
-    create_toplevel()
-    clear_entries()
+def calculate_bmi() -> None:
+    weight = 0 if weight_entry.get() == '' \
+        else convert_weight(weight_combobox.get())(float(weight_entry.get()))
 
-
-def calculate_bmi():
-    weight = 0 if entry_1.get() == '' \
-        else convert_weight(combobox_1.get())(float(entry_1.get()))
-
-    height = 1 if entry_2.get() == '' \
-        else convert_height(combobox_2.get())(float(entry_2.get()))
+    height = 1 if height_entry.get() == '' \
+        else convert_height(height_combobox.get())(float(height_entry.get()))
 
     return weight / pow(height, 2)
 
 
-def convert_weight(unit):
+def convert_weight(unit: str) -> None:
     if unit == "g":
         return lambda weight: weight / 1000
 
@@ -26,7 +21,7 @@ def convert_weight(unit):
     return lambda weight: weight
 
 
-def convert_height(unit):
+def convert_height(unit: str) -> None:
     if unit == "cm":
         return lambda height: height / 100
 
@@ -36,7 +31,7 @@ def convert_height(unit):
     return lambda height: height
 
 
-def evaluate(bmi):
+def evaluate(bmi: str | int | float) -> str:
     bmi = float(bmi)
 
     if bmi >= 30:
@@ -51,23 +46,29 @@ def evaluate(bmi):
     return "Underweight"
 
 
-def create_toplevel():
+def create_toplevel() -> None:
     window = customtkinter.CTkToplevel()
     window.title('')
 
     bmi = "{:.1f}".format(calculate_bmi())
-    label_1 = customtkinter.CTkLabel(
+    bmi_label = customtkinter.CTkLabel(
         window, text=f"BMI:\t{bmi}", font=customtkinter.CTkFont(size=18))
-    label_1.pack(side="top", fill="both", expand=True, padx=40, pady=10)
+    bmi_label.pack(side="top", fill="both", expand=True, padx=40, pady=10)
 
-    label_2 = customtkinter.CTkLabel(
+    evaluation_label = customtkinter.CTkLabel(
         window, text=f"{evaluate(bmi)}", font=customtkinter.CTkFont(size=18))
-    label_2.pack(side="top", fill="both", expand=True, padx=40, pady=10)
+    evaluation_label.pack(side="top", fill="both",
+                          expand=True, padx=40, pady=10)
 
 
-def clear_entries():
-    entry_1.delete(0, len(entry_1.get()))
-    entry_2.delete(0, len(entry_2.get()))
+def clear_entries() -> None:
+    weight_entry.delete(0, len(weight_entry.get()))
+    height_entry.delete(0, len(height_entry.get()))
+
+
+def calculate_button_callback() -> None:
+    create_toplevel()
+    clear_entries()
 
 
 if __name__ == "__main__":
@@ -78,30 +79,32 @@ if __name__ == "__main__":
     app.geometry("360x200")
     app.title("BMI Calculator")
 
-    frame_1 = customtkinter.CTkFrame(master=app)
+    frame_1 = customtkinter.CTkFrame(app)
     frame_1.grid(row=0, column=0, pady=20, padx=60)
 
-    frame_2 = customtkinter.CTkFrame(master=app, fg_color="transparent")
+    frame_2 = customtkinter.CTkFrame(app, fg_color="transparent")
     frame_2.grid(row=1, column=0, padx=60)
 
-    entry_1 = customtkinter.CTkEntry(master=frame_1, placeholder_text="Weight")
-    entry_1.grid(row=0, column=0, pady=10, padx=10)
+    weight_entry = customtkinter.CTkEntry(
+        frame_1, placeholder_text="Weight")
+    weight_entry.grid(row=0, column=0, pady=10, padx=10)
 
-    combobox_1 = customtkinter.CTkComboBox(
+    weight_combobox = customtkinter.CTkComboBox(
         frame_1, width=60, values=["kg", "g", "lbs"])
-    combobox_1.grid(row=0, column=1, pady=10, padx=10)
-    combobox_1.set("kg")
+    weight_combobox.grid(row=0, column=1, pady=10, padx=10)
+    weight_combobox.set("kg")
 
-    entry_2 = customtkinter.CTkEntry(master=frame_1, placeholder_text="Height")
-    entry_2.grid(row=1, column=0, pady=10, padx=10)
+    height_entry = customtkinter.CTkEntry(
+        frame_1, placeholder_text="Height")
+    height_entry.grid(row=1, column=0, pady=10, padx=10)
 
-    combobox_2 = customtkinter.CTkComboBox(
+    height_combobox = customtkinter.CTkComboBox(
         frame_1, width=60, values=["m", "cm", "inch"])
-    combobox_2.grid(row=1, column=1, pady=10, padx=10)
-    combobox_2.set("m")
+    height_combobox.grid(row=1, column=1, pady=10, padx=10)
+    height_combobox.set("m")
 
-    button_1 = customtkinter.CTkButton(
-        master=frame_2, command=button_callback, text="Calculate")
-    button_1.grid(row=0, column=0, pady=10, padx=10)
+    calculate_button = customtkinter.CTkButton(
+        frame_2, command=calculate_button_callback, text="Calculate")
+    calculate_button.grid(row=0, column=0, pady=10, padx=10)
 
     app.mainloop()
