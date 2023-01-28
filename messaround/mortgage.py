@@ -21,7 +21,7 @@ class Mortgage(ABC):
 
         self.total_months = self.loan_term * self.MONTHS
 
-    def total_interest(self):
+    def total_interest(self) -> float:
         return round(self.total_payment() - self.loan_amount, 2)
 
     @abstractmethod
@@ -55,7 +55,7 @@ class FixedMortgage(Mortgage):
 
         self.point_cost = self.prepaid_interest / points if points > 0 else 0
 
-    def monthly_payment(self):
+    def monthly_payment(self) -> float:
         numerator = \
             self.monthly_interest * \
             (1 + self.monthly_interest) ** self.total_months
@@ -64,16 +64,18 @@ class FixedMortgage(Mortgage):
 
         return round(self.loan_amount * numerator / denominator, 2)
 
-    def annual_payment(self):
+    def annual_payment(self) -> float:
         return round(self.monthly_payment() * self.MONTHS, 2)
 
-    def total_payment(self):
+    def total_payment(self) -> float:
         return round(self.monthly_payment() * self.total_months, 2)
 
-    def calculate(self):
+    def calculate(self) -> str:
         log = ""
         log += f"Home Value:\t\t{float(self.home_value)}$\n\n"
+
         log += 47 * "="
+
         log += f"\n\nInterest Rate:\t\t{round(self.interest_rate * 100, 2)}%\nLoan Term:\t\t{self.loan_term} year(s)\nDown Payment:\t\t{self.down_payment}$\n"
 
         if self.points != 0:
@@ -81,12 +83,16 @@ class FixedMortgage(Mortgage):
             log += f"\nPre-Paid Interest:\t\t\t{self.prepaid_interest}$\nPoint Cost:\t\t\t{self.point_cost}$\n\n"
 
         log += 47 * "-"
+
         log += f"\n\nMonthly Payment:\t{self.monthly_payment()}$\n"
         log += f"Annual Payment:\t\t{self.annual_payment()}$\n\n"
         log += f"Loan Amount:\t\t {float(self.loan_amount)}$\n"
         log += f"Total Interest:\t\t{self.total_interest()}$\n"
+
         log += 26 * "-"
+
         log += f"\nTotal Payment:\t\t {self.total_payment()}$\n\n"
+
         log += 47 * "="
 
         return log
@@ -102,7 +108,7 @@ class AdjustableMortgage(Mortgage):
 
         self.adjust_rate = adjust_rate
 
-    def monthly_payment(self):
+    def monthly_payment(self) -> list[float]:
         fixed_mortgage = FixedMortgage(self.home_value, self.interest_rate,
                                        self.loan_term, self.down_payment)
 
@@ -121,7 +127,7 @@ class AdjustableMortgage(Mortgage):
 
         return monthly_payments
 
-    def annual_payment(self):
+    def annual_payment(self) -> list[float]:
         monthly_payments = self.monthly_payment()
 
         annual_payments = [round(monthly_payments[i] * self.MONTHS, 2)
@@ -129,13 +135,15 @@ class AdjustableMortgage(Mortgage):
 
         return annual_payments
 
-    def total_payment(self):
+    def total_payment(self) -> float:
         return round(functools.reduce(lambda a, b: a + b, self.monthly_payment()), 2)
 
-    def calculate(self):
+    def calculate(self) -> str:
         log = ""
         log += f"Home Value:\t\t{float(self.home_value)}$\n\n"
+
         log += 47 * "="
+
         log += f"\n\nBase Rate:\t\t{round(self.interest_rate * 100, 2)}%\nLoan Term:\t\t{self.loan_term} year(s)\nDown Payment:\t\t{self.down_payment}$\n"
 
         log += f"\nFixed Period:\t\t {self.fixed_period} year(s)\nAdjust Rate:\t\t {round(self.adjust_rate * 100, 2)}%\nAdjust Interval:\tAnnual\n\n"
@@ -158,14 +166,17 @@ class AdjustableMortgage(Mortgage):
 
         log += f"Loan Amount:\t\t {float(self.loan_amount)}$\n"
         log += f"Total Interest:\t\t{self.total_interest()}$\n"
+
         log += 34 * "-"
+
         log += f"\nTotal Payment:\t\t {self.total_payment()}$\n\n"
+
         log += 47 * "="
 
         return log
 
 
-def fixed_calculate_callback():
+def fixed_calculate_callback() -> None:
     textbox_1.delete("0.0", "end")
     home_value = home_value_1.get()
 
@@ -199,7 +210,7 @@ def fixed_calculate_callback():
     textbox_1.insert("0.0", fixed_mortgage.calculate())
 
 
-def adjustable_calculate_callback():
+def adjustable_calculate_callback() -> None:
     textbox_2.delete("0.0", "end")
     home_value = home_value_2.get()
 
@@ -234,7 +245,7 @@ def adjustable_calculate_callback():
     textbox_2.insert("0.0", adjustable_mortgage.calculate())
 
 
-def fixed_clear_callback():
+def fixed_clear_callback() -> None:
     textbox_1.delete("0.0", "end")
     home_value_1.delete("0", "end")
     loan_term_1.delete("0", "end")
@@ -244,7 +255,7 @@ def fixed_clear_callback():
     points.set("0")
 
 
-def adjustable_clear_callback():
+def adjustable_clear_callback() -> None:
     textbox_2.delete("0.0", "end")
     home_value_2.delete("0", "end")
     loan_term_2.delete("0", "end")
