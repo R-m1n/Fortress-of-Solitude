@@ -44,16 +44,19 @@ class Mortgage(ABC):
 class FixedMortgage(Mortgage):
     DISCOUNT_PER_POINT = .0025
 
-    def __init__(self, home_value: int | float, interest_rate: float, loan_term: int, down_payment: int | float = 0, points: int | float = 0) -> None:
-        interest_rate = interest_rate - (points * self.DISCOUNT_PER_POINT)
+    def __init__(self, home_value: int | float, interest_rate: float, loan_term: int, down_payment: int | float = 0, fixed_points_combobox: int | float = 0) -> None:
+        interest_rate = interest_rate - \
+            (fixed_points_combobox * self.DISCOUNT_PER_POINT)
 
         super().__init__(home_value, interest_rate, loan_term, down_payment)
 
-        self.points = points
+        self.fixed_points_combobox = fixed_points_combobox
 
-        self.prepaid_interest = self.loan_amount * (points / 100)
+        self.prepaid_interest = self.loan_amount * \
+            (fixed_points_combobox / 100)
 
-        self.point_cost = self.prepaid_interest / points if points > 0 else 0
+        self.point_cost = self.prepaid_interest / \
+            fixed_points_combobox if fixed_points_combobox > 0 else 0
 
     def monthly_payment(self) -> float:
         numerator = \
@@ -78,8 +81,8 @@ class FixedMortgage(Mortgage):
 
         log += f"\n\nInterest Rate:\t\t{round(self.interest_rate * 100, 2)}%\nLoan Term:\t\t{self.loan_term} year(s)\nDown Payment:\t\t{self.down_payment}$\n"
 
-        if self.points != 0:
-            log += f"\nPoints:\t\t\t{self.points}\nRate Discount:\t\t\t{(self.points * self.DISCOUNT_PER_POINT) * 100}%"
+        if self.fixed_points_combobox != 0:
+            log += f"\nfixed_Points_combobox:\t\t\t{self.fixed_points_combobox}\nRate Discount:\t\t\t{(self.fixed_points_combobox * self.DISCOUNT_PER_POINT) * 100}%"
             log += f"\nPre-Paid Interest:\t\t\t{self.prepaid_interest}$\nPoint Cost:\t\t\t{self.point_cost}$\n\n"
 
         log += 47 * "-"
@@ -100,26 +103,26 @@ class FixedMortgage(Mortgage):
 
 class AdjustableMortgage(Mortgage):
 
-    def __init__(self, home_value: int | float, base_rate: float, loan_term: int, fixed_period: int, adjust_rate: float, down_payment: int | float = 0) -> None:
+    def __init__(self, home_value: int | float, base_rate: float, loan_term: int, adj_fixed_period_combobox: int, adj_adjust_rate_combobox: float, down_payment: int | float = 0) -> None:
 
         super().__init__(home_value, base_rate, loan_term, down_payment)
 
-        self.fixed_period = fixed_period
+        self.adj_fixed_period_combobox = adj_fixed_period_combobox
 
-        self.adjust_rate = adjust_rate
+        self.adj_adjust_rate_combobox = adj_adjust_rate_combobox
 
     def monthly_payment(self) -> list[float]:
         fixed_mortgage = FixedMortgage(self.home_value, self.interest_rate,
                                        self.loan_term, self.down_payment)
 
         monthly_payments = [fixed_mortgage.monthly_payment()
-                            for month in range(self.fixed_period * self.MONTHS)]
+                            for month in range(self.adj_fixed_period_combobox * self.MONTHS)]
 
         rate = self.interest_rate
 
-        for month in range((self.loan_term - self.fixed_period) * self.MONTHS):
+        for month in range((self.loan_term - self.adj_fixed_period_combobox) * self.MONTHS):
             if month % self.MONTHS == 0:
-                rate += self.adjust_rate
+                rate += self.adj_adjust_rate_combobox
                 fixed_mortgage = FixedMortgage(self.home_value, rate,
                                                self.loan_term, self.down_payment)
 
@@ -146,7 +149,7 @@ class AdjustableMortgage(Mortgage):
 
         log += f"\n\nBase Rate:\t\t{round(self.interest_rate * 100, 2)}%\nLoan Term:\t\t{self.loan_term} year(s)\nDown Payment:\t\t{self.down_payment}$\n"
 
-        log += f"\nFixed Period:\t\t {self.fixed_period} year(s)\nAdjust Rate:\t\t {round(self.adjust_rate * 100, 2)}%\nAdjust Interval:\tAnnual\n\n"
+        log += f"\nFixed Period:\t\t {self.adj_fixed_period_combobox} year(s)\nAdjust Rate:\t\t {round(self.adj_adjust_rate_combobox * 100, 2)}%\nAdjust Interval:\tAnnual\n\n"
 
         log += 47 * "-"
 
@@ -177,93 +180,96 @@ class AdjustableMortgage(Mortgage):
 
 
 def fixed_calculate_callback() -> None:
-    textbox_1.delete("0.0", "end")
-    home_value = home_value_1.get()
+    fixed_textbox.delete("0.0", "end")
+    home_value = fixed_home_value_entry.get()
 
     if home_value == '':
-        textbox_1.insert("0.0", "Please enter the Home Value!")
+        fixed_textbox.insert("0.0", "Please enter the Home Value!")
         return
 
-    loan_term = loan_term_1.get()
+    loan_term = fixed_loan_term_entry.get()
 
     if loan_term == '':
-        textbox_1.insert("0.0", "Please enter the Loan Term!")
+        fixed_textbox.insert("0.0", "Please enter the Loan Term!")
         return
 
-    interest_rate = interest_rate_1.get()
+    interest_rate = fixed_interest_rate_entry.get()
 
     if interest_rate == '':
-        textbox_1.insert("0.0", "Please enter the Interest Rate!")
+        fixed_textbox.insert("0.0", "Please enter the Interest Rate!")
         return
 
-    down_payment = down_payment_1.get() if down_payment_1.get() != '' else 0
+    down_payment = fixed_down_payment_entry.get(
+    ) if fixed_down_payment_entry.get() != '' else 0
 
-    if unit_1.get() == "%":
+    if fixed_unit_combobox.get() == "%":
         down_payment = float(home_value) * (float(down_payment) / 100)
 
     fixed_mortgage = FixedMortgage(float(home_value),
                                    float(interest_rate) / 100,
                                    int(loan_term),
                                    float(down_payment),
-                                   int(points.get()))
+                                   int(fixed_points_combobox.get()))
 
-    textbox_1.insert("0.0", fixed_mortgage.calculate())
+    fixed_textbox.insert("0.0", fixed_mortgage.calculate())
 
 
 def adjustable_calculate_callback() -> None:
-    textbox_2.delete("0.0", "end")
-    home_value = home_value_2.get()
+    adj_textbox.delete("0.0", "end")
+    home_value = adj_home_value_entry.get()
 
     if home_value == '':
-        textbox_2.insert("0.0", "Please enter the Home Value!")
+        adj_textbox.insert("0.0", "Please enter the Home Value!")
         return
 
-    loan_term = loan_term_2.get()
+    loan_term = adj_loan_term_entry.get()
 
     if loan_term == '':
-        textbox_2.insert("0.0", "Please enter the Loan Term!")
+        adj_textbox.insert("0.0", "Please enter the Loan Term!")
         return
 
-    base_rate = interest_rate_2.get()
+    base_rate = adj_interest_rate_entry.get()
 
     if base_rate == '':
-        textbox_2.insert("0.0", "Please enter the Interest Rate!")
+        adj_textbox.insert("0.0", "Please enter the Interest Rate!")
         return
 
-    down_payment = down_payment_2.get() if down_payment_2.get() != '' else 0
+    down_payment = adj_down_payment_entry.get(
+    ) if adj_down_payment_entry.get() != '' else 0
 
-    if unit_2.get() == "%":
+    if adj_unit_combobox.get() == "%":
         down_payment = float(home_value) * (float(down_payment) / 100)
 
     adjustable_mortgage = AdjustableMortgage(float(home_value),
                                              float(base_rate) / 100,
                                              int(loan_term),
-                                             int(fixed_period.get()),
-                                             float(adjust_rate.get()) / 100,
+                                             int(adj_fixed_period_combobox.get()),
+                                             float(
+                                                 adj_adjust_rate_combobox.get()) / 100,
                                              float(down_payment))
 
-    textbox_2.insert("0.0", adjustable_mortgage.calculate())
+    adj_textbox.insert("0.0", adjustable_mortgage.calculate())
 
 
 def fixed_clear_callback() -> None:
-    textbox_1.delete("0.0", "end")
-    home_value_1.delete("0", "end")
-    loan_term_1.delete("0", "end")
-    interest_rate_1.delete("0", "end")
-    down_payment_1.delete("0", "end")
-    unit_1.set("$")
-    points.set("0")
+    fixed_textbox.delete("0.0", "end")
+    fixed_home_value_entry.delete("0", "end")
+    fixed_loan_term_entry.delete("0", "end")
+    fixed_interest_rate_entry.delete("0", "end")
+    fixed_down_payment_entry.delete("0", "end")
+    fixed_unit_combobox.set("$")
+    fixed_points_combobox.set("0")
 
 
 def adjustable_clear_callback() -> None:
-    textbox_2.delete("0.0", "end")
-    home_value_2.delete("0", "end")
-    loan_term_2.delete("0", "end")
-    interest_rate_2.delete("0", "end")
-    down_payment_2.delete("0", "end")
-    unit_2.set("$")
-    adjust_rate.set("0.25")
-    fixed_period.set("0")
+    adj_textbox.delete("0.0", "end")
+    adj_home_value_entry.delete("0", "end")
+    adj_loan_term_entry.delete("0", "end")
+    adj_interest_rate_entry.delete("0", "end")
+    adj_down_payment_entry.delete("0", "end")
+    adj_unit_combobox.set("$")
+    adj_adjust_rate_combobox.set("0.25")
+    adj_fixed_period_combobox.set("0")
 
 
 if __name__ == "__main__":
@@ -288,178 +294,178 @@ if __name__ == "__main__":
     tabview.tab("Adjustable Mortgage").grid_columnconfigure(0, weight=1)
 
     # Fixed Mortgage Tab
-    frame_1 = customtkinter.CTkFrame(
+    fixed_frame_1 = customtkinter.CTkFrame(
         tabview.tab("Fixed Mortgage"), width=500, height=400, fg_color="transparent")
-    frame_1.grid(row=0, column=0, pady=20, padx=60)
+    fixed_frame_1.grid(row=0, column=0, pady=20, padx=60)
 
-    textbox_1 = customtkinter.CTkTextbox(
-        frame_1, width=500, height=400, font=font)
-    textbox_1.grid(row=0, column=0)
+    fixed_textbox = customtkinter.CTkTextbox(
+        fixed_frame_1, width=500, height=400, font=font)
+    fixed_textbox.grid(row=0, column=0)
 
-    frame_2 = customtkinter.CTkFrame(
+    fixed_frame_2 = customtkinter.CTkFrame(
         tabview.tab("Fixed Mortgage"), fg_color="transparent")
-    frame_2.grid(row=1, column=0, padx=20)
+    fixed_frame_2.grid(row=1, column=0, padx=20)
 
-    home_value_1 = customtkinter.CTkEntry(
-        frame_2, placeholder_text="Home Value")
-    home_value_1.grid(row=0, column=0, pady=10, padx=5)
+    fixed_home_value_entry = customtkinter.CTkEntry(
+        fixed_frame_2, placeholder_text="Home Value")
+    fixed_home_value_entry.grid(row=0, column=0, pady=10, padx=5)
 
-    label_1 = customtkinter.CTkLabel(
-        frame_2, text="$")
-    label_1.grid(row=0, column=1, pady=10, padx=5)
+    fixed_home_value_label = customtkinter.CTkLabel(
+        fixed_frame_2, text="$")
+    fixed_home_value_label.grid(row=0, column=1, pady=10, padx=5)
 
-    space_1 = customtkinter.CTkLabel(
-        frame_2, text="", width=100)
-    space_1.grid(row=0, column=2, pady=10, padx=5)
+    fixed_space_1 = customtkinter.CTkLabel(
+        fixed_frame_2, text="", width=100)
+    fixed_space_1.grid(row=0, column=2, pady=10, padx=5)
 
-    loan_term_1 = customtkinter.CTkEntry(
-        frame_2, placeholder_text="Loan Term")
-    loan_term_1.grid(row=0, column=3, pady=10, padx=5)
+    fixed_loan_term_entry = customtkinter.CTkEntry(
+        fixed_frame_2, placeholder_text="Loan Term")
+    fixed_loan_term_entry.grid(row=0, column=3, pady=10, padx=5)
 
-    label_2 = customtkinter.CTkLabel(
-        frame_2, text="year(s)")
-    label_2.grid(row=0, column=4, pady=10, padx=5)
+    fixed_loan_term_label = customtkinter.CTkLabel(
+        fixed_frame_2, text="year(s)")
+    fixed_loan_term_label.grid(row=0, column=4, pady=10, padx=5)
 
-    interest_rate_1 = customtkinter.CTkEntry(
-        frame_2, placeholder_text="Interest Rate")
-    interest_rate_1.grid(row=1, column=0, pady=10, padx=5)
+    fixed_interest_rate_entry = customtkinter.CTkEntry(
+        fixed_frame_2, placeholder_text="Interest Rate")
+    fixed_interest_rate_entry.grid(row=1, column=0, pady=10, padx=5)
 
-    label_3 = customtkinter.CTkLabel(
-        frame_2, text="%")
-    label_3.grid(row=1, column=1, pady=10, padx=5)
+    fixed_interest_rate_label = customtkinter.CTkLabel(
+        fixed_frame_2, text="%")
+    fixed_interest_rate_label.grid(row=1, column=1, pady=10, padx=5)
 
-    space_2 = customtkinter.CTkLabel(
-        frame_2, text="", width=100)
-    space_2.grid(row=1, column=2, pady=10, padx=5)
+    fixed_space_2 = customtkinter.CTkLabel(
+        fixed_frame_2, text="", width=100)
+    fixed_space_2.grid(row=1, column=2, pady=10, padx=5)
 
-    down_payment_1 = customtkinter.CTkEntry(
-        frame_2, placeholder_text="Down Payment")
-    down_payment_1.grid(row=1, column=3, pady=10, padx=5)
+    fixed_down_payment_entry = customtkinter.CTkEntry(
+        fixed_frame_2, placeholder_text="Down Payment")
+    fixed_down_payment_entry.grid(row=1, column=3, pady=10, padx=5)
 
-    unit_1 = customtkinter.CTkComboBox(
-        frame_2, values=["$", "%"], width=50)
-    unit_1.grid(row=1, column=4, pady=10, padx=5)
-    unit_1.set("$")
+    fixed_unit_combobox = customtkinter.CTkComboBox(
+        fixed_frame_2, values=["$", "%"], width=50)
+    fixed_unit_combobox.grid(row=1, column=4, pady=10, padx=5)
+    fixed_unit_combobox.set("$")
 
-    frame_3 = customtkinter.CTkFrame(
+    fixed_frame_3 = customtkinter.CTkFrame(
         tabview.tab("Fixed Mortgage"), fg_color="transparent")
-    frame_3.grid(row=2, column=0, pady=20, padx=20)
+    fixed_frame_3.grid(row=2, column=0, pady=20, padx=20)
 
-    calculate_1 = customtkinter.CTkButton(
-        frame_3, command=fixed_calculate_callback, text="Calculate")
-    calculate_1.grid(row=0, column=0, pady=10, padx=10)
+    fixed_calculate_button = customtkinter.CTkButton(
+        fixed_frame_3, command=fixed_calculate_callback, text="Calculate")
+    fixed_calculate_button.grid(row=0, column=0, pady=10, padx=10)
 
-    clear_1 = customtkinter.CTkButton(
-        frame_3, command=fixed_clear_callback, text="Clear")
-    clear_1.grid(row=0, column=1, pady=10, padx=10)
+    fixed_clear_button = customtkinter.CTkButton(
+        fixed_frame_3, command=fixed_clear_callback, text="Clear")
+    fixed_clear_button.grid(row=0, column=1, pady=10, padx=10)
 
-    space_3 = customtkinter.CTkLabel(
-        frame_3, text="", width=50)
-    space_3.grid(row=0, column=2, pady=10, padx=5)
+    fixed_space_3 = customtkinter.CTkLabel(
+        fixed_frame_3, text="", width=50)
+    fixed_space_3.grid(row=0, column=2, pady=10, padx=5)
 
-    label_4 = customtkinter.CTkLabel(
-        frame_3, text="Points:")
-    label_4.grid(row=0, column=3, pady=10, padx=5)
+    fixed_points_label = customtkinter.CTkLabel(
+        fixed_frame_3, text="Points:")
+    fixed_points_label.grid(row=0, column=3, pady=10, padx=5)
 
-    points = customtkinter.CTkComboBox(
-        frame_3, values=[str(i) for i in range(11)], width=50)
-    points.grid(row=0, column=4, pady=10, padx=10)
-    points.set("0")
+    fixed_points_combobox = customtkinter.CTkComboBox(
+        fixed_frame_3, values=[str(i) for i in range(11)], width=50)
+    fixed_points_combobox.grid(row=0, column=4, pady=10, padx=10)
+    fixed_points_combobox.set("0")
 
     # Adjustable Mortgage Tab
-    frame_1 = customtkinter.CTkFrame(
+    adj_frame_1 = customtkinter.CTkFrame(
         tabview.tab("Adjustable Mortgage"), width=500, height=400, fg_color="transparent")
-    frame_1.grid(row=0, column=0, pady=20, padx=60)
+    adj_frame_1.grid(row=0, column=0, pady=20, padx=60)
 
-    textbox_2 = customtkinter.CTkTextbox(
-        frame_1, width=500, height=400, font=font)
-    textbox_2.grid(row=0, column=0)
+    adj_textbox = customtkinter.CTkTextbox(
+        adj_frame_1, width=500, height=400, font=font)
+    adj_textbox.grid(row=0, column=0)
 
-    frame_2 = customtkinter.CTkFrame(
+    adj_frame_2 = customtkinter.CTkFrame(
         tabview.tab("Adjustable Mortgage"), fg_color="transparent")
-    frame_2.grid(row=1, column=0, padx=20)
+    adj_frame_2.grid(row=1, column=0, padx=20)
 
-    home_value_2 = customtkinter.CTkEntry(
-        frame_2, placeholder_text="Home Value")
-    home_value_2.grid(row=0, column=0, pady=10, padx=5)
+    adj_home_value_entry = customtkinter.CTkEntry(
+        adj_frame_2, placeholder_text="Home Value")
+    adj_home_value_entry.grid(row=0, column=0, pady=10, padx=5)
 
-    label_1 = customtkinter.CTkLabel(
-        frame_2, text="$")
-    label_1.grid(row=0, column=1, pady=10, padx=5)
+    adj_home_value_label = customtkinter.CTkLabel(
+        adj_frame_2, text="$")
+    adj_home_value_label.grid(row=0, column=1, pady=10, padx=5)
 
-    space_1 = customtkinter.CTkLabel(
-        frame_2, text="", width=100)
-    space_1.grid(row=0, column=2, pady=10, padx=5)
+    adj_space_1 = customtkinter.CTkLabel(
+        adj_frame_2, text="", width=100)
+    adj_space_1.grid(row=0, column=2, pady=10, padx=5)
 
-    loan_term_2 = customtkinter.CTkEntry(
-        frame_2, placeholder_text="Loan Term")
-    loan_term_2.grid(row=0, column=3, pady=10, padx=5)
+    adj_loan_term_entry = customtkinter.CTkEntry(
+        adj_frame_2, placeholder_text="Loan Term")
+    adj_loan_term_entry.grid(row=0, column=3, pady=10, padx=5)
 
-    label_2 = customtkinter.CTkLabel(
-        frame_2, text="year(s)")
-    label_2.grid(row=0, column=4, pady=10, padx=5)
+    adj_loan_term_label = customtkinter.CTkLabel(
+        adj_frame_2, text="year(s)")
+    adj_loan_term_label.grid(row=0, column=4, pady=10, padx=5)
 
-    interest_rate_2 = customtkinter.CTkEntry(
-        frame_2, placeholder_text="Base Rate")
-    interest_rate_2.grid(row=1, column=0, pady=10, padx=5)
+    adj_interest_rate_entry = customtkinter.CTkEntry(
+        adj_frame_2, placeholder_text="Base Rate")
+    adj_interest_rate_entry.grid(row=1, column=0, pady=10, padx=5)
 
-    label_3 = customtkinter.CTkLabel(
-        frame_2, text="%")
-    label_3.grid(row=1, column=1, pady=10, padx=5)
+    adj_interest_rate_label = customtkinter.CTkLabel(
+        adj_frame_2, text="%")
+    adj_interest_rate_label.grid(row=1, column=1, pady=10, padx=5)
 
-    space_2 = customtkinter.CTkLabel(
-        frame_2, text="", width=100)
-    space_2.grid(row=1, column=2, pady=10, padx=5)
+    adj_space_2 = customtkinter.CTkLabel(
+        adj_frame_2, text="", width=100)
+    adj_space_2.grid(row=1, column=2, pady=10, padx=5)
 
-    down_payment_2 = customtkinter.CTkEntry(
-        frame_2, placeholder_text="Down Payment")
-    down_payment_2.grid(row=1, column=3, pady=10, padx=5)
+    adj_down_payment_entry = customtkinter.CTkEntry(
+        adj_frame_2, placeholder_text="Down Payment")
+    adj_down_payment_entry.grid(row=1, column=3, pady=10, padx=5)
 
-    unit_2 = customtkinter.CTkComboBox(
-        frame_2, values=["$", "%"], width=50)
-    unit_2.grid(row=1, column=4, pady=10, padx=5)
-    unit_2.set("$")
+    adj_unit_combobox = customtkinter.CTkComboBox(
+        adj_frame_2, values=["$", "%"], width=50)
+    adj_unit_combobox.grid(row=1, column=4, pady=10, padx=5)
+    adj_unit_combobox.set("$")
 
-    frame_3 = customtkinter.CTkFrame(
+    adj_frame_3 = customtkinter.CTkFrame(
         tabview.tab("Adjustable Mortgage"), fg_color="transparent")
-    frame_3.grid(row=2, column=0, pady=10, padx=20)
+    adj_frame_3.grid(row=2, column=0, pady=10, padx=20)
 
-    frame_4 = customtkinter.CTkFrame(
-        frame_3, fg_color="transparent")
-    frame_4.grid(row=0, column=0)
+    adj_frame_4 = customtkinter.CTkFrame(
+        fixed_frame_3, fg_color="transparent")
+    adj_frame_4.grid(row=0, column=0)
 
-    calculate_2 = customtkinter.CTkButton(
-        frame_4, command=adjustable_calculate_callback, text="Calculate")
-    calculate_2.grid(row=0, column=0, pady=10, padx=10)
+    adj_calculate_button = customtkinter.CTkButton(
+        adj_frame_4, command=adjustable_calculate_callback, text="Calculate")
+    adj_calculate_button.grid(row=0, column=0, pady=10, padx=10)
 
-    clear_2 = customtkinter.CTkButton(
-        frame_4, command=adjustable_clear_callback, text="Clear")
-    clear_2.grid(row=1, column=0, pady=10, padx=10)
+    adj_clear_button = customtkinter.CTkButton(
+        adj_frame_4, command=adjustable_clear_callback, text="Clear")
+    adj_clear_button.grid(row=1, column=0, pady=10, padx=10)
 
-    space_3 = customtkinter.CTkLabel(
-        frame_4, text="", width=170)
-    space_3.grid(row=0, column=2, pady=10, padx=5)
+    adj_space_3 = customtkinter.CTkLabel(
+        adj_frame_4, text="", width=170)
+    adj_space_3.grid(row=0, column=2, pady=10, padx=5)
 
-    frame_5 = customtkinter.CTkFrame(
-        frame_3, fg_color="transparent")
-    frame_5.grid(row=0, column=1)
+    adj_frame_5 = customtkinter.CTkFrame(
+        adj_frame_3, fg_color="transparent")
+    adj_frame_5.grid(row=0, column=1)
 
-    label_4 = customtkinter.CTkLabel(
-        frame_5, text="Adjust Rate:")
-    label_4.grid(row=0, column=0, pady=10, padx=5)
+    adj_adjust_rate_label = customtkinter.CTkLabel(
+        adj_frame_5, text="Adjust Rate:")
+    adj_adjust_rate_label.grid(row=0, column=0, pady=10, padx=5)
 
-    adjust_rate = customtkinter.CTkComboBox(
-        frame_5, values=[str(i / 100) for i in range(25, 201, 25)], width=65)
-    adjust_rate.grid(row=0, column=1, padx=5)
-    adjust_rate.set("0.25")
+    adj_adjust_rate_combobox = customtkinter.CTkComboBox(
+        adj_frame_5, values=[str(i / 100) for i in range(25, 201, 25)], width=65)
+    adj_adjust_rate_combobox.grid(row=0, column=1, padx=5)
+    adj_adjust_rate_combobox.set("0.25")
 
-    label_6 = customtkinter.CTkLabel(
-        frame_5, text="Fixed Period:")
-    label_6.grid(row=1, column=0, padx=5)
+    adj_fixed_period_label = customtkinter.CTkLabel(
+        adj_frame_5, text="Fixed Period:")
+    adj_fixed_period_label.grid(row=1, column=0, padx=5)
 
-    fixed_period = customtkinter.CTkComboBox(
-        frame_5, values=[str(i) for i in range(11)], width=65)
-    fixed_period.grid(row=1, column=1, padx=5)
-    fixed_period.set("0")
+    adj_fixed_period_combobox = customtkinter.CTkComboBox(
+        adj_frame_5, values=[str(i) for i in range(11)], width=65)
+    adj_fixed_period_combobox.grid(row=1, column=1, padx=5)
+    adj_fixed_period_combobox.set("0")
 
     app.mainloop()
