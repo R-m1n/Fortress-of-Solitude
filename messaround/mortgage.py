@@ -82,7 +82,7 @@ class FixedMortgage(Mortgage):
         log += f"\n\nInterest Rate:\t\t{round(self.interest_rate * 100, 2)}%\nLoan Term:\t\t{self.loan_term} year(s)\nDown Payment:\t\t{self.down_payment}$\n"
 
         if self.fixed_points_combobox != 0:
-            log += f"\nfixed_Points_combobox:\t\t\t{self.fixed_points_combobox}\nRate Discount:\t\t\t{(self.fixed_points_combobox * self.DISCOUNT_PER_POINT) * 100}%"
+            log += f"\nPoints:\t\t\t{self.fixed_points_combobox}\nRate Discount:\t\t\t{(self.fixed_points_combobox * self.DISCOUNT_PER_POINT) * 100}%"
             log += f"\nPre-Paid Interest:\t\t\t{self.prepaid_interest}$\nPoint Cost:\t\t\t{self.point_cost}$\n\n"
 
         log += 47 * "-"
@@ -199,8 +199,8 @@ def fixed_calculate_callback() -> None:
         fixed_textbox.insert("0.0", "Please enter the Interest Rate!")
         return
 
-    down_payment = fixed_down_payment_entry.get(
-    ) if fixed_down_payment_entry.get() != '' else 0
+    down_payment = fixed_down_payment_entry.get() \
+        if fixed_down_payment_entry.get() != '' else 0
 
     if fixed_unit_combobox.get() == "%":
         down_payment = float(home_value) * (float(down_payment) / 100)
@@ -234,8 +234,8 @@ def adjustable_calculate_callback() -> None:
         adj_textbox.insert("0.0", "Please enter the Interest Rate!")
         return
 
-    down_payment = adj_down_payment_entry.get(
-    ) if adj_down_payment_entry.get() != '' else 0
+    down_payment = adj_down_payment_entry.get() \
+        if adj_down_payment_entry.get() != '' else 0
 
     if adj_unit_combobox.get() == "%":
         down_payment = float(home_value) * (float(down_payment) / 100)
@@ -431,7 +431,7 @@ if __name__ == "__main__":
     adj_frame_3.grid(row=2, column=0, pady=10, padx=20)
 
     adj_frame_4 = customtkinter.CTkFrame(
-        fixed_frame_3, fg_color="transparent")
+        adj_frame_3, fg_color="transparent")
     adj_frame_4.grid(row=0, column=0)
 
     adj_calculate_button = customtkinter.CTkButton(
