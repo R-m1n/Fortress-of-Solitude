@@ -23,7 +23,7 @@ class Rotor:
         self.combination = dict(zip(self.alphabet, self.alternative))
 
     def get(self, letter: str, reverse: bool = False):
-        return self.combination.get(letter) if not reverse else dict(zip(self.alternative, self.alphabet)).get(letter)
+        return self.combination.get(letter, "#") if not reverse else dict(zip(self.alternative, self.alphabet)).get(letter, "#")
 
     def _count_rotation(self):
         self.rotations += 1
@@ -39,7 +39,7 @@ class Plugboard:
         self.reverse_combination = dict(zip(self.alternative, self.alphabet))
 
     def get(self, letter: str, reverse: bool = False):
-        return self.combination.get(letter) if not reverse else self.reverse_combination.get(letter)
+        return self.combination.get(letter, "#") if not reverse else self.reverse_combination.get(letter, "#")
 
 
 class Enigma:
@@ -90,32 +90,43 @@ class Enigma:
                 self.rotor_3.rotate()
 
 
-# alphabet = list(string.ascii_lowercase)
+def convert_button_callback():
+    alt_1 = alts[int(rotor_1_combobox.get()) - 1]
+    rot_1 = rotor_1_entry.get() if rotor_1_entry.get() != '' else 0
 
-# a1 = alphabet.copy()
-# random.shuffle(a1)
-# a2 = alphabet.copy()
-# random.shuffle(a2)
-# a3 = alphabet.copy()
-# random.shuffle(a3)
-# a4 = alphabet.copy()
-# random.shuffle(a4)
+    rotor_1 = Rotor(alt_1, int(rot_1))
 
-# rotor_list = [Rotor(a1, 10), Rotor(a2, 5), Rotor(a3, 24)]
-# rotor_list1 = copy.deepcopy(rotor_list)
+    alt_2 = alts[int(rotor_2_combobox.get()) - 1]
+    rot_2 = rotor_2_entry.get() if rotor_2_entry.get() != '' else 0
 
-# plugboard = Plugboard(a4)
+    rotor_2 = Rotor(alt_2, int(rot_2))
 
-# e1 = Enigma(*rotor_list, plugboard)
+    alt_3 = alts[int(rotor_3_combobox.get()) - 1]
+    rot_3 = rotor_3_entry.get() if rotor_3_entry.get() != '' else 0
 
-# result = e1.convert("Armin")
+    rotor_3 = Rotor(alt_3, int(rot_3))
 
-# e2 = Enigma(*rotor_list1, plugboard)
+    plugboard = Plugboard(plugboard_alt)
 
-# print(result)
-# print(e2.convert(result))
+    enigma = Enigma(rotor_1, rotor_2, rotor_3, plugboard)
+
+    text = output_textbox.get("0.0", "end").strip()
+
+    output_textbox.delete("0.0", "end")
+    output_textbox.insert("0.0", enigma.convert(text))
+
 
 if __name__ == "__main__":
+    alts = [
+        "eyozmukxsacwrhltjvnibfpgqd",
+        "cjnaovgfyuebrqixwksdtpmzlh",
+        "wnkfoeuqjmdbzpcxigyratlhvs",
+        "hprsdkobvemwgtqfxyjznuliac",
+        "awdtqrbygkejnolpismuzcfhvx",
+    ]
+
+    plugboard_alt = "lpmfhrobsuzqjkvcnxweadtiyg"
+
     customtkinter.set_appearance_mode("dark")
     customtkinter.set_default_color_theme("dark-blue")
 
@@ -125,13 +136,14 @@ if __name__ == "__main__":
 
     text_font = customtkinter.CTkFont(family="consolas", size=16)
     label_font = customtkinter.CTkFont(family="consolas", size=24)
+    entry_font = customtkinter.CTkFont(size=10)
 
     buttons_frame = customtkinter.CTkFrame(
         app, width=600, height=200, fg_color="transparent")
     buttons_frame.grid(row=0, column=0, pady=20, padx=60)
 
     convert_button = customtkinter.CTkButton(
-        buttons_frame, command=lambda i: i, text="Convert")
+        buttons_frame, command=convert_button_callback, text="Convert")
     convert_button.grid(row=0, column=0, pady=10, padx=10)
 
     space_1 = customtkinter.CTkLabel(
@@ -167,6 +179,10 @@ if __name__ == "__main__":
     rotor_1_combobox.grid(row=1, column=0, pady=10, padx=5)
     rotor_1_combobox.set("1")
 
+    rotor_1_entry = customtkinter.CTkEntry(
+        rotor_1_frame, placeholder_text="rotation", width=50, font=entry_font)
+    rotor_1_entry.grid(row=2, column=0, pady=10, padx=5)
+
     rotor_2_frame = customtkinter.CTkFrame(
         rotors_frame, width=520, height=200)
     rotor_2_frame.grid(row=0, column=1, pady=20, padx=60)
@@ -180,6 +196,10 @@ if __name__ == "__main__":
     rotor_2_combobox.grid(row=1, column=0, pady=10, padx=5)
     rotor_2_combobox.set("2")
 
+    rotor_2_entry = customtkinter.CTkEntry(
+        rotor_2_frame, placeholder_text="rotation", width=50, font=entry_font)
+    rotor_2_entry.grid(row=2, column=0, pady=10, padx=5)
+
     rotor_3_frame = customtkinter.CTkFrame(
         rotors_frame, width=520, height=200)
     rotor_3_frame.grid(row=0, column=2, pady=20, padx=60)
@@ -192,5 +212,9 @@ if __name__ == "__main__":
         rotor_3_frame, values=[str(i) for i in range(1, 6)], width=50)
     rotor_3_combobox.grid(row=1, column=0, pady=10, padx=5)
     rotor_3_combobox.set("3")
+
+    rotor_3_entry = customtkinter.CTkEntry(
+        rotor_3_frame, placeholder_text="rotation", width=50, font=entry_font)
+    rotor_3_entry.grid(row=2, column=0, pady=10, padx=5)
 
     app.mainloop()
