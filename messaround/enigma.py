@@ -30,11 +30,25 @@ class Rotor:
         self.rotations %= self.ALPHABET_SIZE
 
 
+class Plugboard:
+    def __init__(self, alternative: str) -> None:
+        self.alphabet = list(string.ascii_lowercase)
+        self.alternative = list(alternative)
+
+        self.combination = dict(zip(self.alphabet, self.alternative))
+        self.reverse_combination = dict(zip(self.alternative, self.alphabet))
+
+    def get(self, letter: str, reverse: bool = False):
+        return self.combination.get(letter) if not reverse else self.reverse_combination.get(letter)
+
+
 class Enigma:
-    def __init__(self, rotor_1: Rotor, rotor_2: Rotor, rotor_3: Rotor) -> None:
+    def __init__(self, rotor_1: Rotor, rotor_2: Rotor, rotor_3: Rotor, plugboard: Plugboard) -> None:
         self.rotor_1 = rotor_1
         self.rotor_2 = rotor_2
         self.rotor_3 = rotor_3
+
+        self.plugboard = plugboard
 
         self.reflector = dict(zip(list(string.ascii_lowercase),
                                   list(string.ascii_lowercase[::-1])))
@@ -50,15 +64,19 @@ class Enigma:
     def _encode(self, letter: str):
         letter = letter.lower()
 
-        encoded = self.rotor_1.get(letter)
+        encoded = self.plugboard.get(letter)
+
+        encoded = self.rotor_1.get(encoded)
         encoded = self.rotor_2.get(encoded)
         encoded = self.rotor_3.get(encoded)
 
         encoded = self.reflector.get(encoded)
 
-        encoded = self.rotor_3.get(encoded, True)
-        encoded = self.rotor_2.get(encoded, True)
-        encoded = self.rotor_1.get(encoded, True)
+        encoded = self.rotor_3.get(encoded, reverse=True)
+        encoded = self.rotor_2.get(encoded, reverse=True)
+        encoded = self.rotor_1.get(encoded, reverse=True)
+
+        encoded = self.plugboard.get(encoded, reverse=True)
 
         return encoded
 
@@ -80,15 +98,19 @@ a2 = alphabet.copy()
 random.shuffle(a2)
 a3 = alphabet.copy()
 random.shuffle(a3)
+a4 = alphabet.copy()
+random.shuffle(a4)
 
 rotor_list = [Rotor(a1, 10), Rotor(a2, 5), Rotor(a3, 24)]
 rotor_list1 = copy.deepcopy(rotor_list)
 
-e1 = Enigma(rotor_list)
+plugboard = Plugboard(a4)
 
-result = e1.convert("armin")
+e1 = Enigma(*rotor_list, plugboard)
 
-e2 = Enigma(rotor_list1)
+result = e1.convert("Armin")
+
+e2 = Enigma(*rotor_list1, plugboard)
 
 print(result)
 print(e2.convert(result))
