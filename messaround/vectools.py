@@ -1,31 +1,6 @@
-
-from math import sqrt
-from pprint import pprint
+from math import sqrt, cos, sin
 
 from numpy import arccos
-
-
-class Unit():
-    def __init__(self, i: int | float, j: int | float, k: int | float) -> None:
-        self.i = i
-        self.j = j
-        self.k = k
-
-    def __str__(self) -> str:
-        return f"Unit({self.i}, {self.j}, {self.k})"
-
-    def __repr__(self) -> str:
-        if self.j > 0 and self.k > 0:
-            return f"{self.i}i + {self.j}j + {self.k}k"
-
-        elif self.j < 0 and self.k > 0:
-            return f"{self.i}i - {abs(self.j)}j + {self.k}k"
-
-        elif self.j > 0 and self.k < 0:
-            return f"{self.i}i + {self.j}j - {abs(self.k)}k"
-
-        elif self.j < 0 and self.k < 0:
-            return f"{self.i}i - {abs(self.j)}j - {abs(self.k)}k"
 
 
 class Vector3():
@@ -58,6 +33,39 @@ class Vector3():
 
     def is_perpendicular(self, other):
         return self * other == 0
+
+    def triangle_area(self, other):
+        return 0.5 * abs(self.cross(other))
+
+    def parallelogram_area(self, other):
+        return abs(self.cross(other)) if self.angle(self, other) != 0 else -1
+
+    def parallelepiped_volume(self, other, another):
+        return abs(another * (self.cross(other)))
+
+    def prism_volume(self, other, another):
+        return 0.5 * self.parallelepiped_volume(other, another)
+
+    def pyramid_volume(self, other, another):
+        return (1 / 6) * self.parallelepiped_volume(other, another)
+
+    def x_rotate(self, theta: float):
+        y = self.y * cos(theta) - self.z * sin(theta)
+        z = self.y * sin(theta) - self.z * cos(theta)
+
+        return Vector3(self.x, y, z)
+
+    def y_rotate(self, theta: float):
+        x = self.x * cos(theta) - self.z * sin(theta)
+        z = -(self.x * sin(theta)) - self.z * cos(theta)
+
+        return Vector3(x, self.y, z)
+
+    def z_rotate(self, theta: float):
+        x = self.x * cos(theta) - self.y * sin(theta)
+        y = self.x * sin(theta) - self.y * cos(theta)
+
+        return Vector3(x, y, self.z)
 
     def __str__(self) -> str:
         return f"Vector3({self.x}, {self.y}, {self.z})"
@@ -98,7 +106,12 @@ class Vector3():
         return sqrt(pow(self.x, 2) + pow(self.y, 2) + pow(self.z, 2))
 
 
-v1 = Vector3(2, 4, 5)
-v2 = Vector3(7, 2, 6)
+class Vector2(Vector3):
+    def __init__(self, x: int | float, y: int | float) -> None:
+        super().__init__(x, y, 0)
 
-pprint(v1.cross(v2))
+    def rotate(self, theta):
+        x = self.x * cos(theta) - self.y * sin(theta)
+        y = self.x * sin(theta) + self.y * cos(theta)
+
+        return Vector2(x, y)
