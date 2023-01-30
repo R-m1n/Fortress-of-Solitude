@@ -13,7 +13,6 @@ class Rotor:
         random.shuffle(self.cipher)
 
         self.combination = dict(zip(self.alphabet, self.cipher))
-        self.reverse_combination = dict(zip(self.cipher, self.alphabet))
 
         self.rotations = 0
         self.rotate(rotation)
@@ -25,11 +24,8 @@ class Rotor:
 
         self.combination = dict(zip(self.alphabet, self.cipher))
 
-    def get(self, letter: str):
-        return self.combination.get(letter)
-
-    def reverse(self, letter: str):
-        return self.reverse_combination.get(letter)
+    def get(self, letter: str, reverse: bool = False):
+        return self.combination.get(letter) if not reverse else dict(zip(self.cipher, self.alphabet)).get(letter)
 
     def _count_rotation(self):
         self.rotations += 1
@@ -38,42 +34,44 @@ class Rotor:
 
 class Enigma:
     def __init__(self, rotors: list[Rotor]) -> None:
-        self.rotors = rotors
+        self.rotor_1 = rotors[0]
+        self.rotor_2 = rotors[1]
+        self.rotor_3 = rotors[2]
+
         self.reflector = dict(zip(list(string.ascii_lowercase),
                                   list(string.ascii_lowercase[::-1])))
 
-    def encode(self, char: str):
-        char = char.lower()
-
-        encoded = self.rotors[0].get(char)
-        encoded = self.rotors[1].get(encoded)
-        encoded = self.rotors[2].get(encoded)
-
-        encoded = self.reflect(encoded)
-
-        encoded = self.rotors[2].reverse(encoded)
-        encoded = self.rotors[1].reverse(encoded)
-        encoded = self.rotors[0].reverse(encoded)
-
-        self.rotors[0].rotate()
-
-        if self.rotors[0].rotations == 0:
-            self.rotors[1].rotate()
-
-            if self.rotors[1].rotations == 0:
-                self.rotors[2].rotate()
-
-        return encoded
-
-    def enigma(self, text):
+    def convert(self, text: str):
         cipher = ""
         for char in text:
-            cipher += self.encode(char)
+            cipher += self._encode(char)
+            self._rotate()
 
         return cipher
 
-    def reflect(self, letter):
-        return self.reflector.get(letter)
+    def _encode(self, char: str):
+        char = char.lower()
+
+        encoded = self.rotor_1.get(char)
+        encoded = self.rotor_2.get(encoded)
+        encoded = self.rotor_3.get(encoded)
+
+        encoded = self.reflector.get(encoded)
+
+        encoded = self.rotor_3.get(encoded, True)
+        encoded = self.rotor_2.get(encoded, True)
+        encoded = self.rotor_1.get(encoded, True)
+
+        return encoded
+
+    def _rotate(self):
+        self.rotor_1.rotate()
+
+        if self.rotor_1.rotations == 0:
+            self.rotor_2.rotate()
+
+            if self.rotor_2.rotations == 0:
+                self.rotor_3.rotate()
 
 
 rotor_list = [Rotor(), Rotor(), Rotor()]
@@ -81,9 +79,9 @@ rotor_list1 = copy.deepcopy(rotor_list)
 
 e1 = Enigma(rotor_list)
 
-result = e1.enigma("hihi")
+result = e1.convert("armin")
 
 e2 = Enigma(rotor_list1)
 
 print(result)
-print(e2.enigma(result))
+print(e2.convert(result))
