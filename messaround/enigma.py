@@ -31,26 +31,26 @@ class Rotor:
 
 
 class Enigma:
-    def __init__(self, rotors: list[Rotor]) -> None:
-        self.rotor_1 = rotors[0]
-        self.rotor_2 = rotors[1]
-        self.rotor_3 = rotors[2]
+    def __init__(self, rotor_1: Rotor, rotor_2: Rotor, rotor_3: Rotor) -> None:
+        self.rotor_1 = rotor_1
+        self.rotor_2 = rotor_2
+        self.rotor_3 = rotor_3
 
         self.reflector = dict(zip(list(string.ascii_lowercase),
                                   list(string.ascii_lowercase[::-1])))
 
     def convert(self, text: str):
         cipher = ""
-        for char in text:
-            cipher += self._encode(char)
+        for letter in text:
+            cipher += self._encode(letter)
             self._rotate()
 
         return cipher
 
-    def _encode(self, char: str):
-        char = char.lower()
+    def _encode(self, letter: str):
+        letter = letter.lower()
 
-        encoded = self.rotor_1.get(char)
+        encoded = self.rotor_1.get(letter)
         encoded = self.rotor_2.get(encoded)
         encoded = self.rotor_3.get(encoded)
 
