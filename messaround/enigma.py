@@ -7,25 +7,23 @@ import copy
 class Rotor:
     ALPHABET_SIZE = len(string.ascii_lowercase)
 
-    def __init__(self, rotation: int = 0) -> None:
+    def __init__(self, alternative: str, rotation: int = 0) -> None:
         self.alphabet = list(string.ascii_lowercase)
-        self.cipher = self.alphabet.copy()
-        random.shuffle(self.cipher)
-
-        self.combination = dict(zip(self.alphabet, self.cipher))
+        self.alternative = list(alternative)
 
         self.rotations = 0
+
         self.rotate(rotation)
 
-    def rotate(self, n: int = 1):
-        for rotation in range(n):
+    def rotate(self, rotation: int = 1):
+        for n in range(rotation):
             self._count_rotation()
-            self.cipher.append(self.cipher.pop(0))
+            self.alternative.append(self.alternative.pop(0))
 
-        self.combination = dict(zip(self.alphabet, self.cipher))
+        self.combination = dict(zip(self.alphabet, self.alternative))
 
     def get(self, letter: str, reverse: bool = False):
-        return self.combination.get(letter) if not reverse else dict(zip(self.cipher, self.alphabet)).get(letter)
+        return self.combination.get(letter) if not reverse else dict(zip(self.alternative, self.alphabet)).get(letter)
 
     def _count_rotation(self):
         self.rotations += 1
@@ -74,7 +72,16 @@ class Enigma:
                 self.rotor_3.rotate()
 
 
-rotor_list = [Rotor(), Rotor(), Rotor()]
+alphabet = list(string.ascii_lowercase)
+
+a1 = alphabet.copy()
+random.shuffle(a1)
+a2 = alphabet.copy()
+random.shuffle(a2)
+a3 = alphabet.copy()
+random.shuffle(a3)
+
+rotor_list = [Rotor(a1, 10), Rotor(a2, 5), Rotor(a3, 24)]
 rotor_list1 = copy.deepcopy(rotor_list)
 
 e1 = Enigma(rotor_list)
