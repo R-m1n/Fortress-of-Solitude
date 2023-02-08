@@ -7,7 +7,10 @@ from pathlib import Path
 
 
 class Product:
-    def __init__(self, name: str, price: float, discount: float, categories: str) -> None:
+    def __init__(self, name: str, price: str,
+                 discount: str, weight: str,
+                 length: str, width: str,
+                 height: str, categories: str) -> None:
 
         self.id = generate_id()
         self.type = "simple"
@@ -19,21 +22,37 @@ class Product:
         self.short_desc = ""
         self.desc = ""
         self.in_stock = 1
-        self.weight = 0
-        self.length = 0
-        self.width = 0
-        self.height = 0
+        self.weight = weight
+        self.length = length
+        self.width = width
+        self.height = height
         self.costumer_review = 1
         self.price = price
-        self.sale_price = price - (price * (discount / 100))
+        self.sale_price = str(
+            float(price) - (float(price) * (float(discount) / 100))
+        )
         self.categories = categories
 
     def info(self) -> list[str]:
         return [
-            self.id, self.type, self.sku, self.name, self.published, self.is_featured,
-            self.visibility, self.short_desc, self.desc, self.in_stock, self.weight,
-            self.length, self.width, self.height, self.costumer_review, self.sale_price,
-            self.price, self.categories,
+            self.id,
+            self.type,
+            self.sku,
+            self.name,
+            self.published,
+            self.is_featured,
+            self.visibility,
+            self.short_desc,
+            self.desc,
+            self.in_stock,
+            self.weight,
+            self.length,
+            self.width,
+            self.height,
+            self.costumer_review,
+            self.sale_price,
+            self.price,
+            self.categories,
         ]
 
 
@@ -70,10 +89,15 @@ if __name__ == "__main__":
         for column in range(1, sheet.max_column + 1):
             product_info.append(sheet.cell(row=row, column=column).value)
 
-        product = Product(product_info[0],
-                          product_info[1],
-                          product_info[2],
-                          product_info[3],)
+        product = Product(name=product_info[0],
+                          price=product_info[1],
+                          discount=product_info[2],
+                          weight=product_info[3],
+                          length=product_info[4],
+                          width=product_info[5],
+                          height=product_info[6],
+                          categories=product_info[7],
+                          )
 
         products.append(product.info())
 
