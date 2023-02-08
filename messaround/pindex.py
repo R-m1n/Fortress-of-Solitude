@@ -106,11 +106,24 @@ if __name__ == "__main__":
 
         if is_empty:
             columns = [
-                "ID", "Type", "SKU", "Name", "Published",
-                "is featured?", "Visibility in catalog",
-                "Short description", "Description", "In stock?",
-                "Stock", "Weight", "Length", "Width", "Height",
-                "Allow customer reviews?", "Sale price", "Regular price",
+                "ID",
+                "Type",
+                "SKU",
+                "Name",
+                "Published",
+                "is featured?",
+                "Visibility in catalog",
+                "Short description",
+                "Description",
+                "In stock?",
+                "Stock",
+                "Weight",
+                "Length",
+                "Width",
+                "Height",
+                "Allow customer reviews?",
+                "Sale price",
+                "Regular price",
                 "Categories",
             ]
 
