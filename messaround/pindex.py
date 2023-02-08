@@ -1,3 +1,4 @@
+import os
 import random
 import string
 import csv
@@ -70,14 +71,13 @@ def generate_id(id_list: list[str]):
 
 if __name__ == "__main__":
     id_list = []
-    is_empty = True
-    csv_file_path = Path("products_record.csv")
 
-    try:
-        source_file = Path(sys.argv[1])
+    csv_file_path = Path("product_record.csv")
 
-    except IndexError:
-        sys.exit()
+    files = [Path(file.name) for file in os.scandir(os.getcwd())
+             if Path(file.name).suffix == ".xlsx"]
+
+    source_file = files.pop() if len(files) != 0 else sys.exit()
 
     xlsx_file = openpyxl.load_workbook(source_file)
     sheet = xlsx_file.active
@@ -104,29 +104,27 @@ if __name__ == "__main__":
     with open(csv_file_path, "w", newline='') as csv_file:
         writer = csv.writer(csv_file)
 
-        if is_empty:
-            columns = [
-                "ID",
-                "Type",
-                "SKU",
-                "Name",
-                "Published",
-                "is featured?",
-                "Visibility in catalog",
-                "Short description",
-                "Description",
-                "In stock?",
-                "Stock",
-                "Weight",
-                "Length",
-                "Width",
-                "Height",
-                "Allow customer reviews?",
-                "Sale price",
-                "Regular price",
-                "Categories",
-            ]
+        columns = [
+            "ID",
+            "Type",
+            "SKU",
+            "Name",
+            "Published",
+            "is featured?",
+            "Visibility in catalog",
+            "Short description",
+            "Description",
+            "In stock?",
+            "Weight",
+            "Length",
+            "Width",
+            "Height",
+            "Allow customer reviews?",
+            "Sale price",
+            "Regular price",
+            "Categories",
+        ]
 
-            writer.writerow(columns)
+        writer.writerow(columns)
 
         writer.writerows(products)
