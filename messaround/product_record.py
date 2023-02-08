@@ -7,8 +7,7 @@ from pathlib import Path
 
 
 class Product:
-    def __init__(self, name: str, weight: float, length: float, width: float,
-                 height: float, price: float, discount: float, categories: str) -> None:
+    def __init__(self, name: str, price: float, discount: float, categories: str) -> None:
 
         self.id = generate_id()
         self.type = "simple"
@@ -20,10 +19,10 @@ class Product:
         self.short_desc = ""
         self.desc = ""
         self.in_stock = 1
-        self.weight = weight
-        self.length = length
-        self.width = width
-        self.height = height
+        self.weight = 0
+        self.length = 0
+        self.width = 0
+        self.height = 0
         self.costumer_review = 1
         self.price = price
         self.sale_price = price - (price * (discount / 100))
@@ -38,13 +37,22 @@ class Product:
         ]
 
 
-def generate_id():
-    return "".join(random.choices(string.digits, k=8))
+def generate_id(id_list: list[str]):
+    id = random.choices(string.digits, k=8)
+
+    id = "".join(id)
+    if id not in id_list:
+        id_list.append(id)
+
+        return id
+
+    generate_id(id_list)
 
 
 if __name__ == "__main__":
+    id_list = []
     is_empty = True
-    csv_file_path = Path("products.csv")
+    csv_file_path = Path("products_record.csv")
 
     try:
         source_file = Path(sys.argv[1])
@@ -52,8 +60,22 @@ if __name__ == "__main__":
     except IndexError:
         sys.exit()
 
-    with openpyxl.load_workbook(source_file) as xlsx_file:
-        sheet = xlsx_file["Sheet1"]
+    xlsx_file = openpyxl.load_workbook(source_file)
+    sheet = xlsx_file.active
+
+    products = []
+    for row in range(1, sheet.max_row + 1):
+        product_info = []
+
+        for column in range(1, sheet.max_column + 1):
+            product_info.append(sheet.cell(row=row, column=column).value)
+
+        product = Product(product_info[0],
+                          product_info[1],
+                          product_info[2],
+                          product_info[3],)
+
+        products.append(product.info())
 
     with open(csv_file_path, "w", newline='') as csv_file:
         writer = csv.writer(csv_file)
@@ -69,3 +91,5 @@ if __name__ == "__main__":
             ]
 
             writer.writerow(columns)
+
+        writer.writerows(products)
