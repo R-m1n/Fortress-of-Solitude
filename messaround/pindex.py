@@ -3,8 +3,11 @@ import random
 import string
 import csv
 import sys
+from typing import Any
 import openpyxl
+import time
 from pathlib import Path
+from alive_progress import alive_bar
 
 
 class Product:
@@ -57,7 +60,7 @@ class Product:
         ]
 
 
-def generate_id():
+def generate_id() -> str:
     id = random.choices(string.digits, k=8)
 
     id = "".join(id)
@@ -66,76 +69,95 @@ def generate_id():
 
         return id
 
-    return generate_id()
+    generate_id()
+
+
+def progress(bar: Any, text: str) -> None:
+    bar.text(text)
+    time.sleep(.5)
+    bar()
+    print("Done.")
 
 
 if __name__ == "__main__":
-    curr_dir_files = {Path(file.name).suffix: Path(file.name) for file in os.scandir(os.getcwd())
-                      if Path(file.name).suffix == ".xlsx" or Path(file.name) == "id_record.csv"}
+    with alive_bar(5, force_tty=True, dual_line=True, bar='blocks') as bar:
+        progress(bar, " -> Collecting source files...")
 
-    if ".xlsx" not in curr_dir_files:
-        sys.exit()
+        curr_dir_files = {Path(file.name).suffix: Path(file.name) for file in os.scandir(os.getcwd())
+                          if Path(file.name).suffix == ".xlsx" or Path(file.name).name == "id_record.csv"}
 
-    if ".csv" in curr_dir_files:
-        with open(curr_dir_files.get(".csv"), "r") as id_record:
-            reader = csv.reader(id_record)
+        if ".xlsx" not in curr_dir_files:
+            print(".xlsx file not found :(")
+            sys.exit()
 
-            for row in reader:
-                id_list = row
+        progress(bar, " -> Initializing ID database...")
 
-    else:
-        id_list = []
+        if ".csv" in curr_dir_files:
+            with open(curr_dir_files.get(".csv"), "r") as id_record:
+                reader = csv.reader(id_record)
 
-    csv_file_path = Path("product_record.csv")
+                for row in reader:
+                    id_list = row
 
-    source_file_path = curr_dir_files.get(".xlsx")
+        else:
+            id_list = []
 
-    xlsx_file = openpyxl.load_workbook(source_file_path)
-    sheet = xlsx_file.active
+        progress(bar, " -> Preparing .xlsx file...")
 
-    shelf = []
-    for row in range(1, sheet.max_row + 1):
-        product_info = []
+        csv_file_path = Path("product_record.csv")
 
-        for column in range(1, sheet.max_column + 1):
-            product_info.append(sheet.cell(row=row, column=column).value)
+        source_file_path = curr_dir_files.get(".xlsx")
 
-        product = Product(name=product_info[0],
-                          price=product_info[1],
-                          discount=product_info[2],
-                          weight=product_info[3],
-                          length=product_info[4],
-                          width=product_info[5],
-                          height=product_info[6],
-                          categories=product_info[7],
-                          )
+        xlsx_file = openpyxl.load_workbook(source_file_path)
+        sheet = xlsx_file.active
 
-        shelf.append(product.info())
+        progress(bar, " -> Cooking up .csv file...")
 
-    with open(csv_file_path, "w", newline='') as csv_file:
-        writer = csv.writer(csv_file)
+        shelf = []
+        for row in range(1, sheet.max_row + 1):
+            product_info = []
 
-        columns = [
-            "ID",
-            "Type",
-            "SKU",
-            "Name",
-            "Published",
-            "is featured?",
-            "Visibility in catalog",
-            "Short description",
-            "Description",
-            "In stock?",
-            "Weight",
-            "Length",
-            "Width",
-            "Height",
-            "Allow customer reviews?",
-            "Sale price",
-            "Regular price",
-            "Categories",
-        ]
+            for column in range(1, sheet.max_column + 1):
+                product_info.append(sheet.cell(row=row, column=column).value)
 
-        writer.writerow(columns)
+            product = Product(name=product_info[0],
+                              price=product_info[1],
+                              discount=product_info[2],
+                              weight=product_info[3],
+                              length=product_info[4],
+                              width=product_info[5],
+                              height=product_info[6],
+                              categories=product_info[7],
+                              )
 
-        writer.writerows(shelf)
+            shelf.append(product.info())
+
+        with open(csv_file_path, "w", newline='') as csv_file:
+            writer = csv.writer(csv_file)
+
+            columns = [
+                "ID",
+                "Type",
+                "SKU",
+                "Name",
+                "Published",
+                "is featured?",
+                "Visibility in catalog",
+                "Short description",
+                "Description",
+                "In stock?",
+                "Weight",
+                "Length",
+                "Width",
+                "Height",
+                "Allow customer reviews?",
+                "Sale price",
+                "Regular price",
+                "Categories",
+            ]
+
+            writer.writerow(columns)
+
+            writer.writerows(shelf)
+
+        progress(bar, " -> Saving .csv file...")
