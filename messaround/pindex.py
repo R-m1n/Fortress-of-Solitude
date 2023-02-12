@@ -19,7 +19,7 @@ class Product:
         self.name = name
         self.published = 1
         self.is_featured = 0
-        self.visibility = 1
+        self.visibility = "visible"
         self.short_desc = ""
         self.desc = ""
         self.in_stock = 1
@@ -32,7 +32,7 @@ class Product:
         self.sale_price = str(
             float(price) - (float(price) * (float(discount) / 100))
         )
-        self.categories = categories
+        self.categories = " > ".join(categories.split("-"))
 
     def info(self) -> list[str]:
         return [
@@ -57,7 +57,7 @@ class Product:
         ]
 
 
-def generate_id(id_list: list[str]):
+def generate_id():
     id = random.choices(string.digits, k=8)
 
     id = "".join(id)
@@ -66,23 +66,34 @@ def generate_id(id_list: list[str]):
 
         return id
 
-    generate_id(id_list)
+    return generate_id()
 
 
 if __name__ == "__main__":
-    id_list = []
+    curr_dir_files = {Path(file.name).suffix: Path(file.name) for file in os.scandir(os.getcwd())
+                      if Path(file.name).suffix == ".xlsx" or Path(file.name) == "id_record.csv"}
+
+    if ".xlsx" not in curr_dir_files:
+        sys.exit()
+
+    if ".csv" in curr_dir_files:
+        with open(curr_dir_files.get(".csv"), "r") as id_record:
+            reader = csv.reader(id_record)
+
+            for row in reader:
+                id_list = row
+
+    else:
+        id_list = []
 
     csv_file_path = Path("product_record.csv")
 
-    files = [Path(file.name) for file in os.scandir(os.getcwd())
-             if Path(file.name).suffix == ".xlsx"]
+    source_file_path = curr_dir_files.get(".xlsx")
 
-    source_file = files.pop() if len(files) != 0 else sys.exit()
-
-    xlsx_file = openpyxl.load_workbook(source_file)
+    xlsx_file = openpyxl.load_workbook(source_file_path)
     sheet = xlsx_file.active
 
-    products = []
+    shelf = []
     for row in range(1, sheet.max_row + 1):
         product_info = []
 
@@ -99,7 +110,7 @@ if __name__ == "__main__":
                           categories=product_info[7],
                           )
 
-        products.append(product.info())
+        shelf.append(product.info())
 
     with open(csv_file_path, "w", newline='') as csv_file:
         writer = csv.writer(csv_file)
@@ -127,4 +138,4 @@ if __name__ == "__main__":
 
         writer.writerow(columns)
 
-        writer.writerows(products)
+        writer.writerows(shelf)
