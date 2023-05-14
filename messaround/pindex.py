@@ -73,14 +73,20 @@ def generate_id() -> str:
 
 
 def progress(bar: Any, text: str) -> None:
-    bar.text(text)
-    time.sleep(.5)
-    bar()
+    for i in range(BARS_PER_CALL):
+        bar.text(text)
+        time.sleep(.04)
+        bar()
+
     print("Done.")
 
 
 if __name__ == "__main__":
-    with alive_bar(5, force_tty=True, dual_line=True, bar='blocks') as bar:
+    TOTAL_BAR = 100
+    TOTAL_PROGRESS_CALL = 5
+    BARS_PER_CALL = TOTAL_BAR // TOTAL_PROGRESS_CALL
+
+    with alive_bar(TOTAL_BAR, force_tty=True, dual_line=True, bar='blocks') as bar:
         progress(bar, " -> Collecting source files...")
 
         curr_dir_files = {Path(file.name).suffix: Path(file.name) for file in os.scandir(os.getcwd())
