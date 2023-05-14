@@ -5,10 +5,11 @@ import numpy as np
 
 
 class Life:
-    def __init__(self, pattern: List[Tuple[int]], length: int = 40) -> None:
-        self.first_gen = np.zeros((length, length * 2), np.int0)
-        self.length = length
-        self.adjust_value = int(math.sqrt(length) + 2) * 2
+    def __init__(self, pattern: List[Tuple[int]], size: int = 40) -> None:
+        self.length = size
+        self.width = size * 2
+        self.first_gen = np.zeros((self.length, self.width), np.int0)
+        self.adjust_value = int(math.sqrt(self.length) + 2) * 2
         self._adjust(pattern)
 
     def play(self) -> Generator:
@@ -35,7 +36,7 @@ class Life:
 
             self.first_gen[row][column] = 1
 
-    def _neighbors(self, coordinates: tuple, length: int) -> List[Tuple[int]]:
+    def _neighbors(self, coordinates: tuple) -> List[Tuple[int]]:
         row, column = coordinates
 
         n = (row - 1, column)
@@ -47,29 +48,25 @@ class Life:
         w = (row, column - 1)
         nw = (row - 1, column - 1)
 
-        potential_neighbors = (n, ne, e, se, s, sw, w, nw)
-        neighbors = []
-
-        for neighbor in potential_neighbors:
-            if (neighbor[0] < 0 or neighbor[0] >= length) or (
-                neighbor[1] < 0 or neighbor[1] >= length * 2
-            ):
-                continue
-
-            neighbors.append(neighbor)
-
-        return neighbors
+        return [
+            neighbor
+            for neighbor in (n, ne, e, se, s, sw, w, nw)
+            if (
+                (neighbor[0] >= 0 and neighbor[0] < self.length)
+                and (neighbor[1] >= 0 and neighbor[1] < self.width)
+            )
+        ]
 
     def _evolve(self, first_gen: List[List[int]]) -> List[List[int]]:
-        next_gen = np.zeros((self.length, self.length * 2), np.int0)
+        next_gen = np.zeros((self.length, self.width), np.int0)
         alive, dead = 1, 0
 
         for row in range(self.length):
-            for column in range(self.length * 2):
+            for column in range(self.width):
                 cell, coordinates = first_gen[row][column], (row, column)
                 alive_neighbors = 0
 
-                for neighbor in self._neighbors(coordinates, self.length):
+                for neighbor in self._neighbors(coordinates):
                     if first_gen[neighbor[0]][neighbor[1]] == alive:
                         alive_neighbors += 1
 
@@ -222,9 +219,9 @@ if __name__ == "__main__":
         ],
     }
 
-    game = Life(patterns.get("acorn")).play()
-    speed = 9
+    game = Life(patterns.get("polsar")).play()
+    speed = 9.7
 
-    for i in range(100):
+    for i in range(500):
         print(next(game))
         sleep(1 - speed / 10)
