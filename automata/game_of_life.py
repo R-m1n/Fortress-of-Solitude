@@ -1,73 +1,78 @@
-import math
+import numpy as np
+
+from math import sqrt
 from time import sleep
 from typing import List, Tuple, Generator
-import numpy as np
 
 
 class Life:
     def __init__(self, pattern: List[Tuple[int]], size: int = 40) -> None:
-        self.length = size
-        self.width = size * 2
+        self.length, self.width = size, size * 2
         self.first_gen = np.zeros((self.length, self.width), np.int0)
-        self.adjust_value = int(math.sqrt(self.length) + 2) * 2
         self._adjust(pattern)
 
     def play(self) -> Generator:
         gen = 1
-        first_gen = self.first_gen
+        curr_gen = self.first_gen
 
         while True:
             plain = "\n"
             plain += f"Generation: {gen}\n"
-            next_gen = self._evolve(first_gen)
+            next_gen = self._evolve(curr_gen)
 
             for row in next_gen:
                 plain += "".join(map(lambda cell: str(cell), row)) + "\n"
 
-            first_gen = next_gen
+            curr_gen = next_gen
             gen += 1
 
             yield plain
 
-    def _adjust(self, points: List[Tuple[int]]) -> None:
-        for point in points:
-            row = point[0] + self.adjust_value - 4
-            column = point[1] + self.adjust_value * 2
+    def _adjust(self, pattern: List[Tuple[int]]) -> None:
+        adjust_value = int(sqrt(self.length) + 2) * 2
 
-            self.first_gen[row][column] = 1
+        for row, column in pattern:
+            adjusted_row, adjusted_column = (
+                row + adjust_value - 4,
+                column + adjust_value * 2,
+            )
+
+            self.first_gen[adjusted_row][adjusted_column] = 1
 
     def _neighbors(self, coordinates: tuple) -> List[Tuple[int]]:
         row, column = coordinates
 
-        n = (row - 1, column)
-        ne = (row - 1, column + 1)
-        e = (row, column + 1)
-        se = (row + 1, column + 1)
-        s = (row + 1, column)
-        sw = (row + 1, column - 1)
-        w = (row, column - 1)
-        nw = (row - 1, column - 1)
+        directions = [
+            (row - 1, column),
+            (row - 1, column + 1),
+            (row, column + 1),
+            (row + 1, column + 1),
+            (row + 1, column),
+            (row + 1, column - 1),
+            (row, column - 1),
+            (row - 1, column - 1),
+        ]
 
         return [
-            neighbor
-            for neighbor in (n, ne, e, se, s, sw, w, nw)
+            (neighbor_row, neighbor_column)
+            for neighbor_row, neighbor_column in directions
             if (
-                (neighbor[0] >= 0 and neighbor[0] < self.length)
-                and (neighbor[1] >= 0 and neighbor[1] < self.width)
+                (0 <= neighbor_row < self.length)
+                and (0 <= neighbor_column < self.width)
             )
         ]
 
-    def _evolve(self, first_gen: List[List[int]]) -> List[List[int]]:
+    def _evolve(self, curr_gen: List[List[int]]) -> List[List[int]]:
         next_gen = np.zeros((self.length, self.width), np.int0)
         alive, dead = 1, 0
 
         for row in range(self.length):
             for column in range(self.width):
-                cell, coordinates = first_gen[row][column], (row, column)
+                cell, coordinates = curr_gen[row][column], (row, column)
                 alive_neighbors = 0
 
-                for neighbor in self._neighbors(coordinates):
-                    if first_gen[neighbor[0]][neighbor[1]] == alive:
+                for neighbor_row, neighbor_column in self._neighbors(coordinates):
+                    if curr_gen[neighbor_row][neighbor_column] == alive:
                         alive_neighbors += 1
 
                 if cell == dead:
@@ -219,9 +224,9 @@ if __name__ == "__main__":
         ],
     }
 
-    game = Life(patterns.get("polsar")).play()
-    speed = 9.7
+    game = Life(patterns.get("hwss")).play()
+    speed = 9
 
-    for i in range(500):
+    for i in range(50):
         print(next(game))
         sleep(1 - speed / 10)
