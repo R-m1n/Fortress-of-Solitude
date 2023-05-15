@@ -29,12 +29,12 @@ class Life:
             yield plain
 
     def _adjust(self, pattern: List[Tuple[int]]) -> None:
-        adjust_value = int(sqrt(self.length) + 2) * 2
+        adjust_values = (int(sqrt(self.length) + 2) * 2, int(sqrt(self.width) + 2) * 4)
 
         for row, column in pattern:
             adjusted_row, adjusted_column = (
-                row + adjust_value - 4,
-                column + adjust_value * 2,
+                row + adjust_values[0],
+                column + adjust_values[1],
             )
 
             self.first_gen[adjusted_row][adjusted_column] = 1
@@ -224,9 +224,10 @@ if __name__ == "__main__":
         ],
     }
 
-    game = Life(patterns.get("hwss")).play()
-    speed = 9
+    size = 55
+    game = Life(patterns.get("ti"), size).play()
+    rate = 9
 
     for i in range(50):
         print(next(game))
-        sleep(1 - speed / 10)
+        sleep(1 - rate / 10)
