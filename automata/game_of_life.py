@@ -3,6 +3,7 @@ import numpy as np
 from math import sqrt
 from time import sleep
 from typing import List, Tuple, Generator
+from argparse import ArgumentParser
 
 
 class Life:
@@ -224,10 +225,46 @@ if __name__ == "__main__":
         ],
     }
 
-    size = 55
-    game = Life(patterns.get("ti"), size).play()
-    rate = 9
+    parser = ArgumentParser(prog="GameOfLife", description="CommandLine Game of Life.")
 
-    for i in range(50):
+    parser.add_argument(
+        "-p",
+        "--pattern",
+        help=f"lexicon: {tuple(patterns.keys())}",
+    )
+
+    parser.add_argument(
+        "-s",
+        "--size",
+        help="size of the plain on a scale of 1-5.",
+    )
+
+    parser.add_argument(
+        "-r",
+        "--rate",
+        help="rate of evolution on a scale of 1-10.",
+    )
+
+    parser.add_argument(
+        "-g",
+        "--gen",
+        help="number of generations.",
+    )
+
+    args = parser.parse_args()
+
+    pattern = (
+        args.pattern if args.pattern != None and args.pattern in patterns else "polsar"
+    )
+
+    size = args.size if args.size != None and 1 <= int(args.size) <= 5 else 1
+
+    gen = args.gen if args.gen != None and 0 < int(args.gen) else 50
+
+    rate = args.rate if args.rate != None and 1 <= int(args.rate) <= 10 else 8
+
+    game = Life(patterns.get(pattern), (40, 45, 50, 55, 60)[int(size) - 1]).play()
+
+    for _ in range(int(gen)):
         print(next(game))
-        sleep(1 - rate / 10)
+        sleep(1 - float(rate) / 10)
