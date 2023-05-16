@@ -6,13 +6,41 @@ from typing import List, Tuple, Generator
 from argparse import ArgumentParser
 
 
+"""
+
+    A python commandline implementation of Conway's Game of Life (https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life).
+
+"""
+
+
 class Life:
-    def __init__(self, pattern: List[Tuple[int]], size: int = 40) -> None:
+    """
+    Attributes
+    ----------
+    pattern: List[Tuple[int]]
+        A list of coordinates of alive cells on the minimum possible plain.
+
+    scale: int
+        Size of the plain.
+
+
+    Methods
+    -------
+    play() -> Generator
+        Yeilds a string of the plain going to the next generation each time it's iterated over or passed to next().
+    """
+
+    def __init__(self, pattern: List[Tuple[int]], scale: int = 2) -> None:
+        size = (40, 45, 50, 55, 60)[scale - 1]
         self.length, self.width = size, size * 2
         self.first_gen = np.zeros((self.length, self.width), np.int0)
         self._adjust(pattern)
 
     def play(self) -> Generator:
+        """
+        Yeilds a string of the plain going to the next generation each time it's iterated over or passed to next().
+        """
+
         gen = 1
         curr_gen = self.first_gen
 
@@ -30,6 +58,15 @@ class Life:
             yield plain
 
     def _adjust(self, pattern: List[Tuple[int]]) -> None:
+        """
+        Adjusts the positioning of a pattern relative to the size of the plain.
+
+        Parameters
+        ----------
+        pattern: List[Tuple[int]]
+            A list of coordinates of alive cells on the minimum possible plain.
+        """
+
         adjust_values = (int(sqrt(self.length) + 2) * 2, int(sqrt(self.width) + 2) * 4)
 
         for row, column in pattern:
@@ -40,7 +77,16 @@ class Life:
 
             self.first_gen[adjusted_row][adjusted_column] = 1
 
-    def _neighbors(self, coordinates: tuple) -> List[Tuple[int]]:
+    def _neighbors(self, coordinates: Tuple) -> List[Tuple[int]]:
+        """
+        Returns a list of the coordinates of neighbors of a cell relative to the size of the plain.
+
+        Parameters
+        ----------
+        coordinates: tuple
+            The coordinates of a cell on the plain.
+        """
+
         row, column = coordinates
 
         directions = [
@@ -64,6 +110,15 @@ class Life:
         ]
 
     def _evolve(self, curr_gen: List[List[int]]) -> List[List[int]]:
+        """
+        Returns the next generation of a given generation.
+
+        Parameters
+        ----------
+        curr_gen: List[List[int]]
+            A generation of cells on the plain.
+        """
+
         next_gen = np.zeros((self.length, self.width), np.int0)
         alive, dead = 1, 0
 
@@ -235,8 +290,8 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-s",
-        "--size",
-        help="size of the plain on a scale of 1-5.",
+        "--scale",
+        help="scale of the plain from 1-5.",
     )
 
     parser.add_argument(
@@ -257,13 +312,13 @@ if __name__ == "__main__":
         args.pattern if args.pattern != None and args.pattern in patterns else "polsar"
     )
 
-    size = args.size if args.size != None and 1 <= int(args.size) <= 5 else 1
+    scale = args.scale if args.scale != None and 1 <= int(args.scale) <= 5 else 1
 
     gen = args.gen if args.gen != None and 0 < int(args.gen) else 50
 
     rate = args.rate if args.rate != None and 1 <= int(args.rate) <= 10 else 8
 
-    game = Life(patterns.get(pattern), (40, 45, 50, 55, 60)[int(size) - 1]).play()
+    game = Life(patterns.get(pattern), int(scale)).play()
 
     for _ in range(int(gen)):
         print(next(game))
