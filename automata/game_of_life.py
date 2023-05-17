@@ -32,13 +32,15 @@ class Life:
 
     def __init__(self, pattern: List[Tuple[int]], scale: int = 2) -> None:
         size = (40, 45, 50, 55, 60)[scale - 1]
+
         self.length, self.width = size, size * 2
-        self.first_gen = np.zeros((self.length, self.width), np.int0)
+
+        self.first_gen = self._empty_plain()
         self._adjust(pattern)
 
     def play(self) -> Generator:
         """
-        Yeilds a string of the plain going to the next generation each time it's iterated over or passed to next().
+        Yeilds a string of the plain, going to the next generation each time it's iterated over or passed to next().
         """
 
         gen = 1
@@ -56,6 +58,13 @@ class Life:
             gen += 1
 
             yield plain
+
+    def _empty_plain(self) -> List[List[int]]:
+        """
+        Returns an empty plain.
+        """
+
+        return np.zeros((self.length, self.width), np.int0)
 
     def _adjust(self, pattern: List[Tuple[int]]) -> None:
         """
@@ -119,7 +128,7 @@ class Life:
             A generation of cells on the plain.
         """
 
-        next_gen = np.zeros((self.length, self.width), np.int0)
+        next_gen = self._empty_plain()
         alive, dead = 1, 0
 
         for row in range(self.length):
@@ -132,25 +141,23 @@ class Life:
                         alive_neighbors += 1
 
                 if cell == dead:
-                    if (
-                        alive_neighbors == 0
-                        or alive_neighbors == 1
-                        or alive_neighbors == 2
-                    ):
-                        next_gen[row][column] = dead
+                    match alive_neighbors:
+                        case 0 | 1 | 2:
+                            next_gen[row][column] = dead
 
-                    elif alive_neighbors == 3:
-                        next_gen[row][column] = alive
+                        case 3:
+                            next_gen[row][column] = alive
 
                 elif cell == alive:
-                    if alive_neighbors == 0 or alive_neighbors == 1:
-                        next_gen[row][column] = dead
+                    match alive_neighbors:
+                        case 0 | 1:
+                            next_gen[row][column] = dead
 
-                    elif alive_neighbors == 2 or alive_neighbors == 3:
-                        next_gen[row][column] = alive
+                        case 2 | 3:
+                            next_gen[row][column] = alive
 
-                    elif alive_neighbors > 3:
-                        next_gen[row][column] = dead
+                        case _:
+                            next_gen[row][column] = dead
 
         return next_gen
 
@@ -291,7 +298,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         "--scale",
-        help="scale of the plain from 1-5.",
+        help="size of the plain on a scale of 1-5.",
     )
 
     parser.add_argument(
@@ -316,7 +323,7 @@ if __name__ == "__main__":
 
     gen = args.gen if args.gen != None and 0 < int(args.gen) else 50
 
-    rate = args.rate if args.rate != None and 1 <= int(args.rate) <= 10 else 8
+    rate = args.rate if args.rate != None and 1 <= float(args.rate) <= 10 else 8
 
     game = Life(patterns.get(pattern), int(scale)).play()
 
