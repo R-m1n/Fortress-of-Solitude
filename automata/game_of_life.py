@@ -30,6 +30,8 @@ class Life:
         Yeilds a string of the plain going to the next generation each time it's iterated over or passed to next().
     """
 
+    ALIVE, DEAD = "1", "0"
+
     def __init__(self, pattern: List[Tuple[int]], scale: int = 2) -> None:
         size = (40, 45, 50, 55, 60)[scale - 1]
 
@@ -52,19 +54,21 @@ class Life:
             next_gen = self._evolve(curr_gen)
 
             for row in next_gen:
-                plain += "".join(map(lambda cell: str(cell), row)) + "\n"
+                plain += "".join(row) + "\n"
 
             curr_gen = next_gen
             gen += 1
 
             yield plain
 
-    def _empty_plain(self) -> List[List[int]]:
+    def _empty_plain(self) -> List[List[str]]:
         """
         Returns an empty plain.
         """
 
-        return np.zeros((self.length, self.width), np.int0)
+        return [
+            [self.DEAD for column in range(self.width)] for row in range(self.length)
+        ]
 
     def _adjust(self, pattern: List[Tuple[int]]) -> None:
         """
@@ -84,9 +88,11 @@ class Life:
                 column + adjust_values[1],
             )
 
-            self.first_gen[adjusted_row][adjusted_column] = 1
+            self.first_gen[adjusted_row][adjusted_column] = self.ALIVE
 
-    def _neighbors(self, coordinates: Tuple) -> List[Tuple[int]]:
+    def _alive_neighbors(
+        self, gen: List[List[str]], coordinates: Tuple
+    ) -> List[Tuple[int]]:
         """
         Returns a list of the coordinates of neighbors of a cell relative to the size of the plain.
 
@@ -109,16 +115,15 @@ class Life:
             (row - 1, column - 1),
         ]
 
-        return [
-            (neighbor_row, neighbor_column)
-            for neighbor_row, neighbor_column in directions
-            if (
-                (0 <= neighbor_row < self.length)
-                and (0 <= neighbor_column < self.width)
-            )
-        ]
+        alive_neighbors = 0
 
-    def _evolve(self, curr_gen: List[List[int]]) -> List[List[int]]:
+        for neighbor_row, neighbor_column in directions:
+            if 0 <= neighbor_row < self.length and 0 <= neighbor_column < self.width:
+                alive_neighbors += int(gen[neighbor_row][neighbor_column])
+
+        return alive_neighbors
+
+    def _evolve(self, curr_gen: List[List[str]]) -> List[List[str]]:
         """
         Returns the next generation of a given generation.
 
@@ -133,21 +138,13 @@ class Life:
         for row in range(self.length):
             for column in range(self.width):
                 cell, coordinates = curr_gen[row][column], (row, column)
-                alive_neighbors = 0
 
-                for neighbor_row, neighbor_column in self._neighbors(coordinates):
-                    if curr_gen[neighbor_row][neighbor_column] == 1:
-                        alive_neighbors += 1
+                match (cell, self._alive_neighbors(curr_gen, coordinates)):
+                    case (self.ALIVE, 2 | 3):
+                        next_gen[row][column] = self.ALIVE
 
-                match (cell, alive_neighbors):
-                    case (1, 2 | 3):
-                        next_gen[row][column] = 1
-
-                    case (0, 3):
-                        next_gen[row][column] = 1
-
-                    case _:
-                        next_gen[row][column] = 0
+                    case (self.DEAD, 3):
+                        next_gen[row][column] = self.ALIVE
 
         return next_gen
 
