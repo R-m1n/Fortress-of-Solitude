@@ -129,7 +129,6 @@ class Life:
         """
 
         next_gen = self._empty_plain()
-        alive, dead = 1, 0
 
         for row in range(self.length):
             for column in range(self.width):
@@ -137,27 +136,18 @@ class Life:
                 alive_neighbors = 0
 
                 for neighbor_row, neighbor_column in self._neighbors(coordinates):
-                    if curr_gen[neighbor_row][neighbor_column] == alive:
+                    if curr_gen[neighbor_row][neighbor_column] == 1:
                         alive_neighbors += 1
 
-                if cell == dead:
-                    match alive_neighbors:
-                        case 0 | 1 | 2:
-                            next_gen[row][column] = dead
+                match (cell, alive_neighbors):
+                    case (1, 2 | 3):
+                        next_gen[row][column] = 1
 
-                        case 3:
-                            next_gen[row][column] = alive
+                    case (0, 3):
+                        next_gen[row][column] = 1
 
-                elif cell == alive:
-                    match alive_neighbors:
-                        case 0 | 1:
-                            next_gen[row][column] = dead
-
-                        case 2 | 3:
-                            next_gen[row][column] = alive
-
-                        case _:
-                            next_gen[row][column] = dead
+                    case _:
+                        next_gen[row][column] = 0
 
         return next_gen
 
