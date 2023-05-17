@@ -1,5 +1,3 @@
-import numpy as np
-
 from math import sqrt
 from time import sleep
 from typing import List, Tuple, Generator
@@ -33,44 +31,43 @@ class Life:
     ALIVE, DEAD = "1", "0"
 
     def __init__(self, pattern: List[Tuple[int]], scale: int = 2) -> None:
-        size = (40, 45, 50, 55, 60)[scale - 1]
+        size = (45, 50, 55, 60, 65)[scale - 1]
 
         self.length, self.width = size, size * 2
 
-        self.first_gen = self._empty_plain()
-        self._adjust(pattern)
+        self.first_gen = self._adjust(self._plain(), pattern)
 
     def play(self) -> Generator:
         """
-        Yeilds a string of the plain, going to the next generation each time it's iterated over or passed to next().
+        Yeilds the plain in form of a string, going to the next generation each time it's iterated over or passed to next().
         """
 
         gen = 1
         curr_gen = self.first_gen
 
         while True:
-            plain = "\n"
-            plain += f"Generation: {gen}\n"
+            s_plain = "\n"
+            s_plain += f"Generation: {gen}\n"
             next_gen = self._evolve(curr_gen)
 
             for row in next_gen:
-                plain += "".join(row) + "\n"
+                s_plain += "".join(row) + "\n"
 
             curr_gen = next_gen
             gen += 1
 
-            yield plain
+            yield s_plain
 
-    def _empty_plain(self) -> List[List[str]]:
+    def _plain(self) -> List[List[str]]:
         """
-        Returns an empty plain.
+        Returns an empty plain, with instance attributes length and width as it's dimentions.
         """
 
         return [
             [self.DEAD for column in range(self.width)] for row in range(self.length)
         ]
 
-    def _adjust(self, pattern: List[Tuple[int]]) -> None:
+    def _adjust(self, plain: List[List[str]], pattern: List[Tuple[int]]) -> None:
         """
         Adjusts the positioning of a pattern relative to the size of the plain.
 
@@ -83,16 +80,11 @@ class Life:
         adjust_values = (int(sqrt(self.length) + 2) * 2, int(sqrt(self.width) + 2) * 4)
 
         for row, column in pattern:
-            adjusted_row, adjusted_column = (
-                row + adjust_values[0],
-                column + adjust_values[1],
-            )
+            plain[row + adjust_values[0]][column + adjust_values[1]] = self.ALIVE
 
-            self.first_gen[adjusted_row][adjusted_column] = self.ALIVE
+        return plain
 
-    def _alive_neighbors(
-        self, gen: List[List[str]], coordinates: Tuple
-    ) -> List[Tuple[int]]:
+    def _alive_neighbors(self, gen: List[List[str]], cell_coordinates: Tuple) -> int:
         """
         Returns a list of the coordinates of neighbors of a cell relative to the size of the plain.
 
@@ -102,7 +94,7 @@ class Life:
             The coordinates of a cell on the plain.
         """
 
-        row, column = coordinates
+        row, column = cell_coordinates
 
         directions = [
             (row - 1, column),
@@ -133,13 +125,13 @@ class Life:
             A generation of cells on the plain.
         """
 
-        next_gen = self._empty_plain()
+        next_gen = self._plain()
 
         for row in range(self.length):
             for column in range(self.width):
-                cell, coordinates = curr_gen[row][column], (row, column)
+                cell = curr_gen[row][column]
 
-                match (cell, self._alive_neighbors(curr_gen, coordinates)):
+                match (cell, self._alive_neighbors(curr_gen, (row, column))):
                     case (self.ALIVE, 2 | 3):
                         next_gen[row][column] = self.ALIVE
 
@@ -302,15 +294,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    pattern = (
-        args.pattern if args.pattern != None and args.pattern in patterns else "polsar"
-    )
+    pattern = args.pattern if args.pattern and args.pattern in patterns else "polsar"
 
-    scale = args.scale if args.scale != None and 1 <= int(args.scale) <= 5 else 1
+    scale = args.scale if args.scale and 1 <= int(args.scale) <= 5 else 1
 
-    gen = args.gen if args.gen != None and 0 < int(args.gen) else 50
+    gen = args.gen if args.gen and 0 < int(args.gen) else 50
 
-    rate = args.rate if args.rate != None and 1 <= float(args.rate) <= 10 else 8
+    rate = args.rate if args.rate and 1 <= float(args.rate) <= 10 else 8
 
     game = Life(patterns.get(pattern), int(scale)).play()
 
