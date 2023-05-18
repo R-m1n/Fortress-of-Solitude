@@ -16,82 +16,85 @@ class Life:
     Attributes
     ----------
     pattern: List[Tuple[int]]
-        A list of coordinates of alive cells on the minimum possible plain.
+        A list of coordinates of live cells on the minimum possible grid.
 
     scale: int
-        Size of the plain.
+        Size of the grid.
 
 
     Methods
     -------
     play() -> Generator
-        Yeilds a string of the plain going to the next generation each time it's iterated over or passed to next().
+        Yeilds the grid in form of a string, going to the next generation each time it's iterated over or passed to next().
     """
 
-    ALIVE, DEAD = "1", "0"
+    LIVE, DEAD = "1", "0"
 
     def __init__(self, pattern: List[Tuple[int]], scale: int = 2) -> None:
         size = (45, 50, 55, 60, 65)[scale - 1]
 
         self.length, self.width = size, size * 2
 
-        self.first_gen = self._adjust(self._plain(), pattern)
+        self.first_gen = self._adjust(self._new_grid(), pattern)
 
     def play(self) -> Generator:
         """
-        Yeilds the plain in form of a string, going to the next generation each time it's iterated over or passed to next().
+        Yeilds the grid in form of a string, going to the next generation each time it's iterated over or passed to next().
         """
 
         gen = 1
         curr_gen = self.first_gen
 
         while True:
-            s_plain = "\n"
-            s_plain += f"Generation: {gen}\n"
+            s_grid = "\n"
+            s_grid += f"Generation: {gen}\n"
             next_gen = self._evolve(curr_gen)
 
             for row in next_gen:
-                s_plain += "".join(row) + "\n"
+                s_grid += "".join(row) + "\n"
 
             curr_gen = next_gen
             gen += 1
 
-            yield s_plain
+            yield s_grid
 
-    def _plain(self) -> List[List[str]]:
+    def _new_grid(self) -> List[List[str]]:
         """
-        Returns an empty plain, with instance attributes length and width as it's dimentions.
+        Returns a grid of dead cells, with instance attributes length and width as it's dimentions.
         """
 
         return [
             [self.DEAD for column in range(self.width)] for row in range(self.length)
         ]
 
-    def _adjust(self, plain: List[List[str]], pattern: List[Tuple[int]]) -> None:
+    def _adjust(self, grid: List[List[str]], pattern: List[Tuple[int]]) -> None:
         """
-        Adjusts the positioning of a pattern relative to the size of the plain.
+        Adjusts the positioning of a pattern on the grid, relative to the size of the grid.
 
         Parameters
         ----------
         pattern: List[Tuple[int]]
-            A list of coordinates of alive cells on the minimum possible plain.
+            A list of coordinates of live cells on the minimum possible grid.
         """
 
         adjust_values = (int(sqrt(self.length) + 2) * 2, int(sqrt(self.width) + 2) * 4)
 
         for row, column in pattern:
-            plain[row + adjust_values[0]][column + adjust_values[1]] = self.ALIVE
+            grid[row + adjust_values[0]][column + adjust_values[1]] = self.LIVE
 
-        return plain
+        return grid
 
-    def _alive_neighbors(self, gen: List[List[str]], cell_coordinates: Tuple) -> int:
+    def _live_neighbors(self, grid: List[List[str]], cell_coordinates: Tuple) -> int:
         """
-        Returns a list of the coordinates of neighbors of a cell relative to the size of the plain.
+        Returns the number of live neighbors of a cell on the grid.
 
         Parameters
         ----------
-        coordinates: tuple
-            The coordinates of a cell on the plain.
+        grid: List[List[str]]
+            A generation of cells.
+
+        cell_coordinates: tuple
+            The coordinates of a cell on the grid.
         """
 
         row, column = cell_coordinates
@@ -107,36 +110,36 @@ class Life:
             (row - 1, column - 1),
         ]
 
-        alive_neighbors = 0
+        live_neighbors = 0
 
         for neighbor_row, neighbor_column in directions:
             if 0 <= neighbor_row < self.length and 0 <= neighbor_column < self.width:
-                alive_neighbors += int(gen[neighbor_row][neighbor_column])
+                live_neighbors += int(grid[neighbor_row][neighbor_column])
 
-        return alive_neighbors
+        return live_neighbors
 
-    def _evolve(self, curr_gen: List[List[str]]) -> List[List[str]]:
+    def _evolve(self, grid: List[List[str]]) -> List[List[str]]:
         """
-        Returns the next generation of a given generation.
+        Returns the next generation of a given grid.
 
         Parameters
         ----------
-        curr_gen: List[List[int]]
-            A generation of cells on the plain.
+        grid: List[List[int]]
+            A generation of cells.
         """
 
-        next_gen = self._plain()
+        next_gen = self._new_grid()
 
         for row in range(self.length):
             for column in range(self.width):
-                cell = curr_gen[row][column]
+                cell = grid[row][column]
 
-                match (cell, self._alive_neighbors(curr_gen, (row, column))):
-                    case (self.ALIVE, 2 | 3):
-                        next_gen[row][column] = self.ALIVE
+                match (cell, self._live_neighbors(grid, (row, column))):
+                    case (self.LIVE, 2 | 3):
+                        next_gen[row][column] = self.LIVE
 
                     case (self.DEAD, 3):
-                        next_gen[row][column] = self.ALIVE
+                        next_gen[row][column] = self.LIVE
 
         return next_gen
 
@@ -151,7 +154,7 @@ if __name__ == "__main__":
         "blinker": [(1, 2), (2, 2), (3, 2)],
         "toad": [(2, 1), (2, 2), (2, 3), (1, 2), (1, 3), (1, 4)],
         "beacon": [(1, 1), (1, 2), (2, 1), (3, 4), (4, 3), (4, 4)],
-        "polsar": [
+        "pulsar": [
             (0, 2),
             (0, 3),
             (0, 4),
@@ -264,6 +267,44 @@ if __name__ == "__main__":
             (4, 2),
             (5, 2),
         ],
+        "gosper-gun": [
+            (5, 1),
+            (5, 2),
+            (6, 1),
+            (6, 2),
+            (3, 13),
+            (3, 14),
+            (4, 12),
+            (5, 11),
+            (6, 11),
+            (7, 11),
+            (8, 12),
+            (9, 13),
+            (9, 14),
+            (4, 16),
+            (5, 17),
+            (6, 15),
+            (6, 17),
+            (6, 18),
+            (7, 17),
+            (8, 16),
+            (3, 21),
+            (3, 22),
+            (4, 21),
+            (4, 22),
+            (5, 21),
+            (5, 22),
+            (2, 23),
+            (2, 25),
+            (1, 25),
+            (6, 23),
+            (6, 25),
+            (7, 25),
+            (3, 35),
+            (3, 36),
+            (4, 35),
+            (4, 36),
+        ],
     }
 
     parser = ArgumentParser(prog="GameOfLife", description="CommandLine Game of Life.")
@@ -277,7 +318,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         "--scale",
-        help="size of the plain on a scale of 1-5.",
+        help="size of the grid on a scale of 1-5.",
     )
 
     parser.add_argument(
@@ -294,7 +335,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    pattern = args.pattern if args.pattern and args.pattern in patterns else "polsar"
+    pattern = args.pattern if args.pattern and args.pattern in patterns else "pulsar"
 
     scale = args.scale if args.scale and 1 <= int(args.scale) <= 5 else 1
 
