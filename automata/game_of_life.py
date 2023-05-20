@@ -69,7 +69,7 @@ class Life:
 
     def _adjust(self, grid: List[List[str]], pattern: List[Tuple[int]]) -> None:
         """
-        Adjusts the positioning of a pattern on the grid, relative to the size of the grid.
+        Adjusts the positioning of a pattern on the grid, relative to the size of the grid i.e. instance attributes length and width.
 
         Parameters
         ----------
@@ -132,9 +132,7 @@ class Life:
 
         for row in range(self.length):
             for column in range(self.width):
-                cell = grid[row][column]
-
-                match (cell, self._live_neighbors(grid, (row, column))):
+                match (grid[row][column], self._live_neighbors(grid, (row, column))):
                     case (self.LIVE, 2 | 3):
                         next_gen[row][column] = self.LIVE
 
@@ -147,7 +145,7 @@ class Life:
 if __name__ == "__main__":
     patterns = {
         "block": [(1, 1), (1, 2), (2, 1), (2, 2)],
-        "bee_hive": [(1, 2), (1, 3), (2, 1), (2, 4), (3, 2), (3, 3)],
+        "bee-hive": [(1, 2), (1, 3), (2, 1), (2, 4), (3, 2), (3, 3)],
         "loaf": [(1, 2), (1, 3), (2, 1), (2, 4), (3, 3), (3, 5), (4, 3)],
         "boat": [(1, 1), (1, 2), (2, 1), (2, 3), (3, 2)],
         "tub": [(1, 2), (2, 1), (2, 3), (3, 2)],
@@ -251,8 +249,8 @@ if __name__ == "__main__":
             (3, 5),
             (3, 6),
         ],
-        "r_petomino": [(0, 1), (0, 2), (1, 0), (1, 1), (2, 1)],
-        "die hard": [(1, 0), (1, 1), (2, 1), (0, 6), (2, 5), (2, 6), (2, 7)],
+        "r-petomino": [(0, 1), (0, 2), (1, 0), (1, 1), (2, 1)],
+        "die-hard": [(1, 0), (1, 1), (2, 1), (0, 6), (2, 5), (2, 6), (2, 7)],
         "acorn": [(0, 1), (1, 3), (2, 0), (2, 1), (2, 4), (2, 5), (2, 6)],
         "flint": [(2, 1), (2, 2), (2, 3), (1, 3), (1, 0)],
         "ti": [
@@ -339,7 +337,7 @@ if __name__ == "__main__":
 
     scale = args.scale if args.scale and 1 <= int(args.scale) <= 5 else 1
 
-    gen = args.gen if args.gen and 0 < int(args.gen) else 50
+    gen = args.gen if args.gen and 0 < int(args.gen) else 100
 
     rate = args.rate if args.rate and 1 <= float(args.rate) <= 10 else 8
 
