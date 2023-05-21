@@ -25,7 +25,7 @@ class Life:
     Examples
     --------
     ```python
-    game = Life(2, [(1, 2), (2, 2), (3, 2)])
+    game = Life(2, [(2, 0), (2, 1), (2, 2), (1, 2), (0, 1)])
     for gen in range(10):
         print(f"Generation: {gen + 1}\\n{next(game)}")
         sleep(0.2)
@@ -49,9 +49,9 @@ class Life:
         Parameters
         ----------
         scale: int, 2
-            Determines the size of the grid; each number on the scale (n mod 5),
+            Determines the size of the grid; each number on the scale (n mod 5)
             correspondes to a specific length and width.
-        pattern: List[Tuple[int]], optional
+        pattern: List[Tuple[int]], PATTERNS.get("gosper-gun")
             A list of coordinates of live cells on the minimum possible grid.
         """
 
@@ -59,9 +59,11 @@ class Life:
 
         self.length, self.width = size, size * 2
 
-        self.generation = (
-            self._adjust(self._new_grid(), pattern) if pattern else self._new_grid()
-        )
+        self.pattern = pattern if pattern else list(tuple())
+
+        self.generation = self._new_grid()
+
+        self._adjust()
 
     def __str__(self) -> str:
         return self._chain()
@@ -95,6 +97,15 @@ class Life:
 
         self.generation = next_gen
 
+    def reset(self) -> None:
+        """
+        Resets the generation attribute to its initial state.
+        """
+
+        self.generation = self._new_grid()
+
+        self._adjust()
+
     def _new_grid(self) -> List[List[str]]:
         """
         Returns a grid of dead cells, with attributes length and width as its dimentions.
@@ -104,26 +115,18 @@ class Life:
             [self.DEAD for column in range(self.width)] for row in range(self.length)
         ]
 
-    def _adjust(
-        self, grid: List[List[str]], pattern: List[Tuple[int, int]]
-    ) -> List[List[str]]:
+    def _adjust(self) -> None:
         """
         Adjusts the positioning of a pattern on the grid, relative to the size of the grid.
-
-        Parameters
-        ----------
-        grid: List[List[str]]
-            A generation of cells.
-        pattern: List[Tuple[int]]
-            A list of coordinates of live cells on the minimum possible grid.
         """
 
         adjust_values = (int(sqrt(self.length) + 2) * 2, int(sqrt(self.width) + 2) * 4)
 
-        for row, column in pattern:
-            grid[row + adjust_values[0]][column + adjust_values[1]] = self.LIVE
+        for row, column in self.pattern:
+            row = row + adjust_values[0]
+            column = column + adjust_values[1]
 
-        return grid
+            self.generation[row][column] = self.LIVE
 
     def _live_neighbors(self, cell_coordinates: Tuple[int, int]) -> int:
         """
