@@ -1,6 +1,6 @@
 from math import sqrt
 from time import sleep
-from typing import List, Tuple, Generator
+from typing import Dict, List, Tuple, Generator
 from argparse import ArgumentParser
 
 
@@ -15,48 +15,58 @@ class Life:
     """
     Attributes
     ----------
-    pattern: List[Tuple[int]]
-        A list of coordinates of live cells on the minimum possible grid.
-
-    scale: int
-        Size of the grid.
-
+    length: int
+        The number of rows in the grid.
+    width: int
+        The number of columns in the grid.
+    first_gen: List[List[str]]
+        A grid of cells with the initial pattern's positioning adjusted to it's size.
 
     Methods
     -------
-    play() -> Generator
-        Yeilds the grid in form of a string, going to the next generation each time it's iterated over or passed to next().
+    play() -> Generator[str, None, None]
+        Yields the string of a generation of cells, going to the next generation each time it's iterated over or passed to next().
     """
 
     LIVE, DEAD = "1", "0"
 
-    def __init__(self, pattern: List[Tuple[int]], scale: int = 2) -> None:
-        size = (45, 50, 55, 60, 65)[scale - 1]
+    def __init__(
+        self, scale: int = 2, pattern: List[Tuple[int, int]] | None = None
+    ) -> None:
+        """
+        Parameters
+        ----------
+        scale: int, 2
+            Determines the size of the grid, each number on the scale (n mod 5) correspondes to a specific length and width.
+        pattern: List[Tuple[int]], optional
+            A list of coordinates of live cells on the minimum possible grid.
+        """
+
+        size = (45, 50, 55, 60, 65)[(scale - 1) % 5]
 
         self.length, self.width = size, size * 2
 
-        self.first_gen = self._adjust(self._new_grid(), pattern)
+        self.first_gen = (
+            self._adjust(self._new_grid(), pattern) if pattern else self._new_grid()
+        )
 
-    def play(self) -> Generator:
+    def __str__(self) -> str:
+        return self._chain(self.first_gen)
+
+    def __len__(self):
+        return self.length * self.width
+
+    def play(self) -> Generator[str, None, None]:
         """
-        Yeilds the grid in form of a string, going to the next generation each time it's iterated over or passed to next().
+        Yields the string of a generation of cells, going to the next generation each time it's iterated over or passed to next().
         """
 
-        gen = 1
         curr_gen = self.first_gen
 
         while True:
-            s_grid = "\n"
-            s_grid += f"Generation: {gen}\n"
-            next_gen = self._evolve(curr_gen)
+            curr_gen = self._evolve(curr_gen)
 
-            for row in next_gen:
-                s_grid += "".join(row) + "\n"
-
-            curr_gen = next_gen
-            gen += 1
-
-            yield s_grid
+            yield self._chain(curr_gen)
 
     def _new_grid(self) -> List[List[str]]:
         """
@@ -67,12 +77,16 @@ class Life:
             [self.DEAD for column in range(self.width)] for row in range(self.length)
         ]
 
-    def _adjust(self, grid: List[List[str]], pattern: List[Tuple[int]]) -> None:
+    def _adjust(
+        self, grid: List[List[str]], pattern: List[Tuple[int, int]]
+    ) -> List[List[str]]:
         """
         Adjusts the positioning of a pattern on the grid, relative to the size of the grid i.e. instance attributes length and width.
 
         Parameters
         ----------
+        grid: List[List[str]]
+            A generation of cells.
         pattern: List[Tuple[int]]
             A list of coordinates of live cells on the minimum possible grid.
         """
@@ -84,7 +98,9 @@ class Life:
 
         return grid
 
-    def _live_neighbors(self, grid: List[List[str]], cell_coordinates: Tuple) -> int:
+    def _live_neighbors(
+        self, grid: List[List[str]], cell_coordinates: Tuple[int, int]
+    ) -> int:
         """
         Returns the number of live neighbors of a cell on the grid.
 
@@ -92,8 +108,7 @@ class Life:
         ----------
         grid: List[List[str]]
             A generation of cells.
-
-        cell_coordinates: tuple
+        cell_coordinates: Tuple[int, int]
             The coordinates of a cell on the grid.
         """
 
@@ -141,9 +156,25 @@ class Life:
 
         return next_gen
 
+    def _chain(self, grid: List[List[str]]) -> str:
+        """
+        Returns the string representation of a grid.
+
+        Parameters
+        ----------
+        grid: List[List[int]]
+            A generation of cells.
+        """
+
+        chained = ""
+        for row in grid:
+            chained += "".join(row) + "\n"
+
+        return chained
+
 
 if __name__ == "__main__":
-    patterns = {
+    patterns: Dict[str, List[Tuple[int, int]]] = {
         "block": [(1, 1), (1, 2), (2, 1), (2, 2)],
         "bee-hive": [(1, 2), (1, 3), (2, 1), (2, 4), (3, 2), (3, 3)],
         "loaf": [(1, 2), (1, 3), (2, 1), (2, 4), (3, 3), (3, 5), (4, 3)],
@@ -335,14 +366,14 @@ if __name__ == "__main__":
 
     pattern = args.pattern if args.pattern and args.pattern in patterns else "pulsar"
 
-    scale = args.scale if args.scale and 1 <= int(args.scale) <= 5 else 1
+    scale = int(args.scale if args.scale and 1 <= int(args.scale) <= 5 else 1)
 
-    gen = args.gen if args.gen and 0 < int(args.gen) else 100
+    gen = int(args.gen if args.gen and 0 < int(args.gen) else 100)
 
-    rate = args.rate if args.rate and 1 <= float(args.rate) <= 10 else 8
+    rate = float(args.rate if args.rate and 1 <= float(args.rate) <= 10 else 8)
 
-    game = Life(patterns.get(pattern), int(scale)).play()
+    game = Life(scale, patterns.get(pattern)).play()
 
-    for _ in range(int(gen)):
-        print(next(game))
+    for curr_gen in range(gen):
+        print(f"\nGeneration: {curr_gen + 1}\n" + next(game))
         sleep(1 - float(rate) / 10)
