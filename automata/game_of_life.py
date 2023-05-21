@@ -16,16 +16,34 @@ class Life:
     Attributes
     ----------
     length: int
-        The number of rows in the grid.
+        The number of rows on the grid.
     width: int
-        The number of columns in the grid.
+        The number of columns on the grid.
     first_gen: List[List[str]]
-        A grid of cells with the initial pattern's positioning adjusted to it's size.
+        A grid of cells with the initial pattern's positioning adjusted to its size.
 
     Methods
     -------
     play() -> Generator[str, None, None]
         Yields the string of a generation of cells, going to the next generation each time it's iterated over or passed to next().
+
+    Examples
+    --------
+    ```python
+    game = Life(2, [(1, 2), (2, 2), (3, 2)]).play()
+    for i in range(10):
+        print(f"Generation: {i + 1}\\n" + next(game))
+        sleep(0.2)
+
+    another_game = Life(5, [(2, 0), (2, 1), (2, 2), (1, 2), (0, 1)]).play()
+    i = 0
+    for gen in another_game:
+        if i == 100:
+            break
+
+        print(f"Generation: {i + 1}\\n" + gen)
+        i += 1
+    ```
     """
 
     LIVE, DEAD = "1", "0"
@@ -37,7 +55,7 @@ class Life:
         Parameters
         ----------
         scale: int, 2
-            Determines the size of the grid, each number on the scale (n mod 5) correspondes to a specific length and width.
+            Determines the size of the grid; each number on the scale (n mod 5) correspondes to a specific length and width.
         pattern: List[Tuple[int]], optional
             A list of coordinates of live cells on the minimum possible grid.
         """
@@ -70,7 +88,7 @@ class Life:
 
     def _new_grid(self) -> List[List[str]]:
         """
-        Returns a grid of dead cells, with instance attributes length and width as it's dimentions.
+        Returns a grid of dead cells, with instance attributes length and width as its dimentions.
         """
 
         return [
@@ -81,7 +99,7 @@ class Life:
         self, grid: List[List[str]], pattern: List[Tuple[int, int]]
     ) -> List[List[str]]:
         """
-        Adjusts the positioning of a pattern on the grid, relative to the size of the grid i.e. instance attributes length and width.
+        Adjusts the positioning of a pattern on the grid, relative to the size of the grid.
 
         Parameters
         ----------
@@ -135,7 +153,7 @@ class Life:
 
     def _evolve(self, grid: List[List[str]]) -> List[List[str]]:
         """
-        Returns the next generation of a given grid.
+        Returns the next generation of a grid.
 
         Parameters
         ----------
@@ -375,5 +393,5 @@ if __name__ == "__main__":
     game = Life(scale, patterns.get(pattern)).play()
 
     for curr_gen in range(gen):
-        print(f"\nGeneration: {curr_gen + 1}\n" + next(game))
+        print(f"Generation: {curr_gen + 1}\n" + next(game))
         sleep(1 - float(rate) / 10)
