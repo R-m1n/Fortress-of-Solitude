@@ -157,3 +157,5 @@ dmypy.json
 hs_err_pid*
 
 Main.java
+
+.vscode
