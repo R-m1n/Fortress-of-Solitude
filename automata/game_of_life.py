@@ -22,6 +22,11 @@ class Life:
     generation: List[List[str]]
         A grid of cells with the initial pattern's positioning adjusted to its size.
 
+    Methods
+    -------
+    evolve()
+        Evolves the generation attribute.
+
     Examples
     --------
     ```python
@@ -96,15 +101,6 @@ class Life:
                         next_gen[row][column] = self.LIVE
 
         self.generation = next_gen
-
-    def reset(self) -> None:
-        """
-        Resets the generation attribute to its initial state.
-        """
-
-        self.generation = self._new_grid()
-
-        self._adjust()
 
     def _new_grid(self) -> List[List[str]]:
         """
@@ -375,4 +371,4 @@ if __name__ == "__main__":
 
     for curr_gen in range(gen):
         print(f"Generation: {curr_gen + 1}\n{next(game)}")
-        sleep(1 - float(rate) / 10)
+        sleep(1 - rate / 10)
