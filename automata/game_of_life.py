@@ -61,9 +61,9 @@ class Life:
             A list of coordinates of live cells on the minimum possible grid.
         """
 
-        size = (45, 50, 55, 60, 65)[(scale - 1) % 5]
+        size = (40, 45, 50, 55, 60)[(scale - 1) % 5]
 
-        self.length, self.width = size, size * 2
+        self.length, self.width = size, size * 3
 
         self.pattern = pattern if pattern else list(tuple())
 
@@ -139,7 +139,6 @@ class Life:
         )
 
         live_neighbors = 0
-
         for neighbor_row, neighbor_col in directions:
             if 0 <= neighbor_row < self.length and 0 <= neighbor_col < self.width:
                 live_neighbors += int(self.generation[neighbor_row][neighbor_col])
@@ -307,6 +306,36 @@ PATTERNS: Dict[str, List[Tuple[int, int]]] = {
         (4, 35),
         (4, 36),
     ],
+    "infinite-line": [
+        (1, 0),
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (1, 4),
+        (1, 5),
+        (1, 6),
+        (1, 7),
+        (1, 9),
+        (1, 10),
+        (1, 11),
+        (1, 12),
+        (1, 13),
+        (1, 17),
+        (1, 18),
+        (1, 19),
+        (1, 26),
+        (1, 27),
+        (1, 28),
+        (1, 29),
+        (1, 30),
+        (1, 31),
+        (1, 32),
+        (1, 34),
+        (1, 35),
+        (1, 36),
+        (1, 37),
+        (1, 38),
+    ],
 }
 
 
@@ -345,7 +374,7 @@ if __name__ == "__main__":
 
     gen = int(args.gen if args.gen and 0 < int(args.gen) else 100)
 
-    rate = float(args.rate if args.rate and 1 <= float(args.rate) <= 10 else 8)
+    rate = float(args.rate if args.rate and 1 <= float(args.rate) <= 10 else 9)
 
     game = Life(scale, PATTERNS.get(pattern))
 
