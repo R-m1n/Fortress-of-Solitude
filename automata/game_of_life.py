@@ -25,7 +25,8 @@ class Life:
     Methods
     -------
     evolve()
-        Evolves the generation attribute.
+        Applies the rules of "Game of Life" to the generation attribute,
+        effectively taking it to its next generation.
 
     Examples
     --------
@@ -54,9 +55,9 @@ class Life:
         Parameters
         ----------
         scale: int, 2
-            Determines the size of the grid; each number on the scale (n mod 5)
+            Determines the size of the grid; each number (n mod 5)
             correspondes to a specific length and width.
-        pattern: List[Tuple[int]], PATTERNS.get("gosper-gun")
+        pattern: List[Tuple[int, int]], optional
             A list of coordinates of live cells on the minimum possible grid.
         """
 
@@ -71,7 +72,11 @@ class Life:
         self._adjust()
 
     def __str__(self) -> str:
-        return self._chain()
+        s = ""
+        for row in self.generation:
+            s += "".join(row) + "\n"
+
+        return s
 
     def __len__(self):
         return self.length * self.width
@@ -79,26 +84,24 @@ class Life:
     def __next__(self) -> str:
         self.evolve()
 
-        return self._chain()
+        return str(self)
 
     def evolve(self) -> None:
         """
-        Evolves the generation attribute.
+        Applies the rules of "Game of Life" to the generation attribute,
+        effectively taking it to its next generation.
         """
 
         next_gen = self._new_grid()
 
         for row in range(self.length):
-            for column in range(self.width):
-                match (
-                    self.generation[row][column],
-                    self._live_neighbors((row, column)),
-                ):
+            for col in range(self.width):
+                match (self.generation[row][col], self._live_neighbors(row, col)):
                     case (self.LIVE, 2 | 3):
-                        next_gen[row][column] = self.LIVE
+                        next_gen[row][col] = self.LIVE
 
                     case (self.DEAD, 3):
-                        next_gen[row][column] = self.LIVE
+                        next_gen[row][col] = self.LIVE
 
         self.generation = next_gen
 
@@ -107,64 +110,41 @@ class Life:
         Returns a grid of dead cells, with attributes length and width as its dimentions.
         """
 
-        return [
-            [self.DEAD for column in range(self.width)] for row in range(self.length)
-        ]
+        return [[self.DEAD for col in range(self.width)] for row in range(self.length)]
 
     def _adjust(self) -> None:
         """
-        Adjusts the positioning of a pattern on the grid, relative to the size of the grid.
+        Adjusts the positioning of a pattern on the generation attribute, relative to it's size.
         """
 
         adjust_values = (int(sqrt(self.length) + 2) * 2, int(sqrt(self.width) + 2) * 4)
 
-        for row, column in self.pattern:
-            row = row + adjust_values[0]
-            column = column + adjust_values[1]
+        for row, col in self.pattern:
+            self.generation[row + adjust_values[0]][col + adjust_values[1]] = self.LIVE
 
-            self.generation[row][column] = self.LIVE
-
-    def _live_neighbors(self, cell_coordinates: Tuple[int, int]) -> int:
+    def _live_neighbors(self, cell_row: int, cell_col: int) -> int:
         """
         Returns the number of live neighbors of a cell on the generation attribute.
-
-        Parameters
-        ----------
-        cell_coordinates: Tuple[int, int]
-            The coordinates of a cell on the grid.
         """
 
-        row, column = cell_coordinates
-
-        directions = [
-            (row - 1, column),
-            (row - 1, column + 1),
-            (row, column + 1),
-            (row + 1, column + 1),
-            (row + 1, column),
-            (row + 1, column - 1),
-            (row, column - 1),
-            (row - 1, column - 1),
-        ]
+        directions = (
+            (cell_row - 1, cell_col),
+            (cell_row - 1, cell_col + 1),
+            (cell_row, cell_col + 1),
+            (cell_row + 1, cell_col + 1),
+            (cell_row + 1, cell_col),
+            (cell_row + 1, cell_col - 1),
+            (cell_row, cell_col - 1),
+            (cell_row - 1, cell_col - 1),
+        )
 
         live_neighbors = 0
 
-        for neighbor_row, neighbor_column in directions:
-            if 0 <= neighbor_row < self.length and 0 <= neighbor_column < self.width:
-                live_neighbors += int(self.generation[neighbor_row][neighbor_column])
+        for neighbor_row, neighbor_col in directions:
+            if 0 <= neighbor_row < self.length and 0 <= neighbor_col < self.width:
+                live_neighbors += int(self.generation[neighbor_row][neighbor_col])
 
         return live_neighbors
-
-    def _chain(self) -> str:
-        """
-        Returns the string representation of the generation attribute.
-        """
-
-        chained = ""
-        for row in self.generation:
-            chained += "".join(row) + "\n"
-
-        return chained
 
 
 PATTERNS: Dict[str, List[Tuple[int, int]]] = {
